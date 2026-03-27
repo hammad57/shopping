@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Store | Online Shopping</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .snap-x { scroll-snap-type: x mandatory; }
+        .snap-center { scroll-snap-align: center; }
+        .slider-dot { width: 8px; height: 8px; border-radius: 50%; background: #ddd; margin: 0 4px; transition: 0.3s; }
+        .active-dot { background: #2563eb; width: 20px; border-radius: 10px; }
+        .liked { color: #ef4444 !important; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-900">
+
+    <nav class="bg-white shadow-sm sticky top-0 z-50 p-4">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <button onclick="openSidebar()" class="text-gray-600 text-xl hover:text-blue-600 transition outline-none p-1 rounded-full bg-gray-50 h-9 w-9 flex items-center justify-center border border-gray-100">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <h1 class="text-2xl font-black text-blue-600 tracking-tighter">STORE</h1>
+            </div>
+            
+            <div id="userTools" class="flex items-center gap-2">
+                <a href="https://hammad3423944508.github.io/shoping/help.html" class="text-gray-600 hover:text-blue-600 p-2 transition">
+                    <i class="fa-solid fa-headset text-xl"></i>
+                </a>
+                <button onclick="openWishlist()" class="text-gray-600 hover:text-pink-600 p-2 transition">
+                    <i class="fa-solid fa-heart text-xl"></i>
+                </button>
+                <button onclick="openCart()" class="relative text-gray-600 hover:text-blue-600 p-2">
+                    <i class="fa-solid fa-cart-shopping text-xl"></i>
+                    <span id="cartCount" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold hidden">0</span>
+                </button>
+                <button onclick="openAuth()" id="loginBtn" class="bg-blue-600 text-white px-5 py-1.5 rounded-full text-sm font-bold shadow-md shadow-blue-200">Login</button>
+                <div id="userInfo" class="hidden flex items-center gap-3">
+                    <button onclick="openOrders()" class="text-blue-600 text-xs font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-box-open"></i> My Orders
+                    </button>
+                    <button onclick="logout()" class="text-red-500 text-xs font-bold bg-red-50 p-2 rounded-lg">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 hidden z-[80] transition-opacity backdrop-blur-sm" onclick="closeSidebar()"></div>
+    
+    <div id="sidebarMenu" class="fixed top-0 left-0 w-64 h-full bg-white shadow-2xl z-[90] transform -translate-x-full transition-transform duration-300 flex flex-col rounded-r-3xl">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-blue-50/50 rounded-tr-3xl">
+            <h2 class="font-black text-2xl text-blue-600 tracking-tighter">MENU</h2>
+            <button onclick="closeSidebar()" class="text-gray-400 hover:text-red-500 text-2xl font-bold transition outline-none">&times;</button>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto p-5 space-y-6 no-scrollbar">
+            <div>
+                <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-layer-group text-blue-400"></i> Categories
+                </h3>
+                <ul id="sidebarCatList" class="space-y-2"></ul>
+            </div>
+            
+            <hr class="border-gray-100 border-dashed">
+            
+            <div class="space-y-2">
+                <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-link text-blue-400"></i> Quick Links
+                </h3>
+                <a href="#" onclick="openWishlist(); closeSidebar();" class="flex items-center gap-4 text-gray-700 font-bold hover:bg-gray-50 hover:text-pink-600 p-3 rounded-xl transition">
+                    <div class="bg-pink-100 text-pink-500 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-heart text-xs"></i></div> My Favorites
+                </a>
+                <a href="https://hammad3423944508.github.io/shoping/help.html" class="flex items-center gap-4 text-gray-700 font-bold hover:bg-gray-50 hover:text-blue-600 p-3 rounded-xl transition">
+                    <div class="bg-blue-100 text-blue-500 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-headset text-xs"></i></div> Help
+                </a>
+                <a href="#" onclick="alert('Contact Us at: 03423944508'); closeSidebar();" class="flex items-center gap-4 text-gray-700 font-bold hover:bg-gray-50 hover:text-green-600 p-3 rounded-xl transition">
+                    <div class="bg-green-100 text-green-500 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-brands fa-whatsapp text-sm"></i></div> Contact Us
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto p-4">
+        <div class="relative mb-6">
+            <i class="fa-solid fa-magnifying-glass absolute left-4 top-4 text-gray-400"></i>
+            <input type="text" id="search" autocomplete="new-password" placeholder="Search product name or code..." onkeyup="search()" class="w-full p-4 pl-12 rounded-2xl border-none shadow-sm outline-blue-500 bg-white text-sm">
+        </div>
+
+        <div id="catSlider" class="flex gap-3 overflow-x-auto no-scrollbar snap-x mb-8 pb-2"></div>
+
+        <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+    </div>
+
+    <div id="pModal" class="fixed inset-0 bg-black/80 hidden z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-[32px] overflow-hidden relative flex flex-col max-h-[95vh] shadow-2xl">
+            <button onclick="closeModal('pModal')" class="absolute top-4 right-4 bg-white/90 rounded-full w-10 h-10 z-50 font-bold shadow-lg flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition">×</button>
+
+            <div class="relative p-2 mt-2">
+                <div id="pSlider" class="w-full h-80 flex overflow-x-auto snap-x no-scrollbar rounded-2xl bg-gray-50 scroll-smooth"></div>
+                <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1 pointer-events-none" id="dotsContainer"></div>
+                <div class="absolute bottom-6 right-6 bg-green-500 text-white px-4 py-1.5 rounded-full font-black shadow-lg text-lg">
+                    Rs. <span id="mPrice"></span>
+                </div>
+            </div>
+
+            <div class="p-6 overflow-y-auto">
+                <div class="flex justify-between items-start mb-3 gap-2">
+                    <div class="flex-1">
+                        <h2 id="mName" class="text-2xl font-black text-gray-800 leading-tight"></h2>
+                        <span id="mCode" class="bg-blue-50 text-blue-600 text-[10px] px-3 py-1 rounded-full font-bold border border-blue-100 uppercase mt-2 inline-block"></span>
+                    </div>
+                </div>
+                
+                <p id="mDesc" class="text-gray-500 text-sm mb-6 leading-relaxed"></p>
+
+                <div class="flex items-center gap-2 mb-6">
+                    <button onclick="shareProduct(selected.id)" class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-blue-50 hover:text-blue-600 transition shadow-sm">
+                        <i class="fa-solid fa-share-nodes"></i>
+                    </button>
+                    <button onclick="toggleLike(selected.id, event)" id="modalLikeIcon" class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition shadow-sm">
+                        <i class="fa-solid fa-heart"></i>
+                    </button>
+                    <button onclick="addToCart(selected.id)" class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-orange-50 hover:text-orange-600 transition shadow-sm">
+                        <i class="fa-solid fa-cart-plus"></i>
+                    </button>
+                    <button onclick="openOrder()" class="flex-1 bg-blue-600 text-white py-3.5 rounded-2xl font-bold text-sm shadow-xl shadow-blue-200 hover:bg-blue-700 transition">
+                        Order Now
+                    </button>
+                </div>
+
+                <div id="similarSection" class="hidden border-t border-gray-100 pt-4 mt-2">
+                    <h4 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-3">More in this category</h4>
+                    <div id="mSimilar" class="flex gap-3 overflow-x-auto no-scrollbar snap-x pb-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="cartModal" class="fixed inset-0 bg-black/80 hidden z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-[32px] p-6 max-h-[85vh] flex flex-col relative shadow-2xl">
+            <button onclick="closeModal('cartModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400 hover:text-red-500 transition">×</button>
+            <h2 class="text-2xl font-black mb-6 flex items-center gap-2"><i class="fa-solid fa-cart-shopping text-blue-600"></i> My Cart</h2>
+            
+            <div id="cartItemsList" class="flex-1 overflow-y-auto space-y-4 pr-2 no-scrollbar"></div>
+            
+            <div class="mt-6 pt-4 border-t border-gray-100 space-y-2">
+                <div class="flex justify-between text-sm"><span>Items:</span> <span id="cartSubtotal" class="font-bold">Rs. 0</span></div>
+                <div class="flex justify-between text-sm text-blue-600"><span>Delivery:</span> <span class="font-bold">Rs. 150</span></div>
+                <div class="flex justify-between text-xl font-black"><span>Total:</span> <span id="cartGrandTotal" class="text-blue-700">Rs. 0</span></div>
+                <button onclick="checkoutCart()" id="checkoutBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mt-2 shadow-lg hover:bg-blue-700 transition">Proceed to Checkout</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="wishlistModal" class="fixed inset-0 bg-black/80 hidden z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-[32px] p-6 max-h-[80vh] overflow-y-auto relative shadow-2xl">
+            <button onclick="closeModal('wishlistModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400 hover:text-red-500 transition">×</button>
+            <h2 class="text-2xl font-black mb-6 flex items-center gap-2"><i class="fa-solid fa-heart text-red-500"></i> My Favorites</h2>
+            <div id="wishlistItems" class="grid grid-cols-2 gap-3"></div>
+        </div>
+    </div>
+
+    <div id="oModal" class="fixed inset-0 bg-black/80 hidden z-[70] flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-[32px] p-8 shadow-2xl max-h-[95vh] overflow-y-auto no-scrollbar">
+            <div id="step1">
+                <h3 class="text-2xl font-black mb-6 flex items-center gap-2"><i class="fa-solid fa-truck-fast text-blue-600"></i> Delivery Info</h3>
+                <div class="space-y-3">
+                    <select id="uSize" class="w-full p-4 bg-gray-50 border-none rounded-2xl outline-blue-500 hidden font-semibold text-gray-700 text-sm"></select>
+                    <input type="text" id="uName" placeholder="Full Name" class="w-full p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
+                    <input type="tel" id="uPhone" placeholder="Mobile Number" class="w-full p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
+                    <div class="flex gap-2">
+                        <input type="text" id="uCity" placeholder="City" class="w-1/2 p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
+                        <input type="text" id="uSector" placeholder="Sector/Area" class="w-1/2 p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
+                    </div>
+                    <div class="relative">
+                        <textarea id="uAddr" placeholder="Full Address" class="w-full p-3.5 pr-14 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm" rows="3"></textarea>
+                        <button onclick="getPinLocation()" class="absolute top-3 right-3 bg-blue-100 text-blue-600 p-2 rounded-xl text-xs font-black shadow-sm hover:bg-blue-200 transition">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </button>
+                    </div>
+                    <input type="text" id="uLandmark" placeholder="Mashhoor Jagah (Optional)" class="w-full p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
+                </div>
+                <button onclick="goConfirm()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold mt-6 shadow-lg shadow-blue-200 transition">Confirm Details</button>
+                <button onclick="closeModal('oModal')" class="w-full mt-4 text-gray-400 hover:text-gray-600 text-sm font-bold transition">Cancel</button>
+            </div>
+            
+            <div id="step2" class="hidden">
+                <h3 class="text-2xl font-black mb-4 text-center">Payment Info</h3>
+                <div class="bg-blue-50 p-4 rounded-2xl mb-4 text-xs space-y-2 border border-blue-100">
+                    <p class="font-bold text-blue-800 underline">Payment Methods:</p>
+                    <p><b>1. Easypaisa:</b> 03423944508 <br> (Name: Muluk Hussain)</p>
+                    <p><b>2. National Bank (NBP):</b> <br> 14004260352387 (Name: Muluk Hussain)</p>
+                    <p><b>Instructions:</b> <br> Payment send krny k baad Transection ID likh kr <b>send to whatsapp</b> pe click krin</p>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-2xl mb-4 space-y-2 text-sm">
+                    <div class="flex justify-between"><span>Price:</span> <span id="fPrice" class="font-bold"></span></div>
+                    <div class="flex justify-between text-blue-600"><span>Delivery:</span> <span class="font-bold">Rs. 150</span></div>
+                    <div class="border-t border-dashed pt-2 flex justify-between text-lg font-black"><span>Total:</span> <span id="fTotal" class="text-blue-700"></span></div>
+                </div>
+                <input type="text" id="uTrx" placeholder="Enter Transaction ID" class="w-full p-4 bg-yellow-50 border-2 border-yellow-200 rounded-2xl mb-4 outline-none font-bold text-center placeholder-yellow-600/50">
+                <button onclick="processOrder()" class="w-full bg-green-500 hover:bg-green-600 text-white py-5 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl shadow-green-200 transition">
+                    <i class="fa-brands fa-whatsapp text-2xl"></i> Send to WhatsApp
+                </button>
+                <button onclick="document.getElementById('step2').classList.add('hidden'); document.getElementById('step1').classList.remove('hidden');" class="w-full mt-4 text-gray-400 hover:text-gray-600 text-sm font-bold transition">Back to Edit</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="historyModal" class="fixed inset-0 bg-black/80 hidden z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-[32px] p-6 max-h-[80vh] overflow-y-auto relative shadow-2xl">
+            <button onclick="closeModal('historyModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400 hover:text-red-500 transition outline-none">×</button>
+            <h2 class="text-2xl font-black mb-6 flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-blue-500"></i> My Orders</h2>
+            <div id="myOrderList" class="space-y-4"></div>
+        </div>
+    </div>
+
+    <div id="aModal" class="fixed inset-0 bg-black/80 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-[32px] p-8 shadow-2xl relative">
+            <button onclick="closeModal('aModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400 hover:text-red-500 transition outline-none">×</button>
+            <h2 class="text-2xl font-black mb-6 text-center text-blue-600">User Portal</h2>
+            <input type="email" id="email" placeholder="Email" class="w-full p-4 bg-gray-50 rounded-2xl mb-3 border border-gray-100 outline-blue-500 text-sm">
+            <input type="password" id="pass" placeholder="Password" class="w-full p-4 bg-gray-50 rounded-2xl mb-4 border border-gray-100 outline-blue-500 text-sm">
+            <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold mb-2 shadow-lg shadow-blue-200 transition">Login</button>
+            <button onclick="register()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 rounded-2xl font-bold transition">Register</button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQ0Ckzlgy8GV-uP89ypRHwrMX2Wq-2Mok",
+            authDomain: "onlineshoping-bcf3b.firebaseapp.com",
+            databaseURL: "https://onlineshoping-bcf3b-default-rtdb.firebaseio.com/",
+            projectId: "onlineshoping-bcf3b",
+            storageBucket: "onlineshoping-bcf3b.firebasestorage.app",
+            messagingSenderId: "634849561995",
+            appId: "1:634849561995:web:caa5e8916b5489e1f4f38e"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+
+        let selected = null;
+        let currentUser = null;
+        let cart = [];
+        let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+        let isCartOrder = false;
+
+        auth.onAuthStateChanged(user => {
+            currentUser = user;
+            if(user) {
+                document.getElementById('loginBtn').classList.add('hidden');
+                document.getElementById('userInfo').classList.remove('hidden');
+                closeModal('aModal');
+            } else {
+                document.getElementById('loginBtn').classList.remove('hidden');
+                document.getElementById('userInfo').classList.add('hidden');
+            }
+        });
+
+        function openSidebar() {
+            document.getElementById('sidebarOverlay').classList.remove('hidden');
+            setTimeout(() => { document.getElementById('sidebarMenu').classList.remove('-translate-x-full'); }, 10);
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebarMenu').classList.add('-translate-x-full');
+            setTimeout(() => { document.getElementById('sidebarOverlay').classList.add('hidden'); }, 300);
+        }
+
+        function openAuth() { document.getElementById('aModal').classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function login() { auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); }
+        function register() { auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); }
+        function logout() { auth.signOut(); }
+
+        const cardTemplate = (p) => {
+            const isLiked = wishlist.includes(p.id) ? 'liked' : '';
+            return `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer hover:shadow-md transition group" onclick="view('${p.id}')">
+                <div class="relative overflow-hidden">
+                    <img src="${p.images[0]}" class="w-full h-44 object-cover group-hover:scale-105 transition duration-300">
+                    <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase backdrop-blur-sm border border-white/20">${p.code}</span>
+                    
+                    <div class="absolute top-2 right-2 flex flex-col gap-2 z-20">
+                        <button onclick="toggleLike('${p.id}', event)" class="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-md hover:bg-white transition">
+                            <i class="fa-solid fa-heart ${isLiked} text-gray-400 text-xs"></i>
+                        </button>
+                        <button onclick="shareProduct('${p.id}', event)" class="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-md hover:bg-white transition">
+                            <i class="fa-solid fa-share-nodes text-gray-600 text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="font-bold text-sm truncate text-gray-800">${p.name}</h3>
+                    <div class="flex justify-between items-center mt-1">
+                        <p class="text-blue-600 font-black text-sm">Rs. ${p.price}</p>
+                        <button onclick="addToCart('${p.id}', event)" class="text-gray-400 hover:text-orange-500 transition"><i class="fa-solid fa-cart-plus"></i></button>
+                    </div>
+                </div>
+            </div>`;
+        };
+
+        db.ref('categories').on('value', snap => {
+            const div = document.getElementById('catSlider'); 
+            const sideDiv = document.getElementById('sidebarCatList'); 
+            div.innerHTML = ''; sideDiv.innerHTML = '';
+            snap.forEach(child => {
+                const catName = child.val().name;
+                const encodedCat = encodeURIComponent(catName);
+                div.innerHTML += `<button onclick="filterCat(decodeURIComponent('${encodedCat}'))" class="bg-white border border-gray-200 min-w-[35%] py-3 px-4 rounded-2xl snap-center font-bold text-xs hover:bg-blue-600 hover:text-white transition uppercase shadow-sm">${catName}</button>`;
+                sideDiv.innerHTML += `<li><button onclick="filterCat(decodeURIComponent('${encodedCat}')); closeSidebar();" class="w-full text-left bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-600 p-3 rounded-xl text-sm font-bold transition flex justify-between items-center border border-transparent hover:border-blue-100">${catName} <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i></button></li>`;
+            });
+        });
+
+        db.ref('products').on('value', snap => {
+            window.prods = []; const grid = document.getElementById('grid'); grid.innerHTML = '';
+            snap.forEach(child => {
+                const p = child.val(); p.id = child.key; window.prods.push(p);
+                grid.innerHTML += cardTemplate(p);
+            });
+        });
+
+        function view(id) {
+            selected = window.prods.find(x => x.id === id);
+            document.getElementById('mName').innerText = selected.name;
+            document.getElementById('mCode').innerText = selected.code;
+            document.getElementById('mDesc').innerText = selected.desc;
+            document.getElementById('mPrice').innerText = selected.price;
+            
+            const likeIcon = document.getElementById('modalLikeIcon').querySelector('i');
+            likeIcon.className = wishlist.includes(id) ? 'fa-solid fa-heart liked' : 'fa-solid fa-heart';
+
+            const s = document.getElementById('pSlider'); s.innerHTML = '';
+            const d = document.getElementById('dotsContainer'); d.innerHTML = '';
+            selected.images.forEach((img, index) => {
+                s.innerHTML += `<div class="w-full flex-shrink-0 snap-center"><img src="${img}" class="w-full h-full object-cover rounded-2xl"></div>`;
+                d.innerHTML += `<div class="slider-dot ${index === 0 ? 'active-dot' : ''}"></div>`;
+            });
+            s.onscroll = () => {
+                const idx = Math.round(s.scrollLeft / s.offsetWidth);
+                d.querySelectorAll('.slider-dot').forEach((dot, i) => dot.classList.toggle('active-dot', i === idx));
+            };
+
+            const similarContainer = document.getElementById('mSimilar');
+            similarContainer.innerHTML = '';
+            const similarItems = window.prods.filter(p => p.category === selected.category && p.id !== selected.id).slice(0, 5);
+            if(similarItems.length > 0) {
+                document.getElementById('similarSection').classList.remove('hidden');
+                similarItems.forEach(p => {
+                    similarContainer.innerHTML += `<div onclick="view('${p.id}')" class="w-32 flex-shrink-0 bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm cursor-pointer snap-center hover:border-blue-200 transition"><img src="${p.images[0]}" class="w-full h-24 object-cover"><div class="p-2 text-center"><h4 class="text-[10px] font-bold text-gray-800 truncate">${p.name}</h4><p class="text-[11px] text-blue-600 font-black mt-0.5">Rs. ${p.price}</p></div></div>`;
+                });
+            } else { document.getElementById('similarSection').classList.add('hidden'); }
+            document.getElementById('pModal').classList.remove('hidden');
+        }
+
+        function toggleLike(id, e) {
+            if(e) e.stopPropagation();
+            const index = wishlist.indexOf(id);
+            if(index === -1) wishlist.push(id);
+            else wishlist.splice(index, 1);
+            localStorage.setItem('wishlist', JSON.stringify(wishlist));
+            
+            if(selected && selected.id === id) {
+                const icon = document.getElementById('modalLikeIcon').querySelector('i');
+                icon.classList.toggle('liked', wishlist.includes(id));
+            }
+            search(); 
+        }
+
+        function openWishlist() {
+            const list = document.getElementById('wishlistItems');
+            list.innerHTML = '';
+            const items = window.prods.filter(p => wishlist.includes(p.id));
+            if(items.length === 0) list.innerHTML = '<p class="col-span-2 text-center text-gray-400 py-10 font-bold">No favorites yet!</p>';
+            items.forEach(p => { list.innerHTML += cardTemplate(p); });
+            document.getElementById('wishlistModal').classList.remove('hidden');
+        }
+
+        function shareProduct(id, e) {
+            if(e) e.stopPropagation();
+            const p = window.prods.find(x => x.id === id);
+            const shareText = `*${p.name}*\nCode: ${p.code}\nPrice: Rs. ${p.price}\n\nDescription: ${p.desc}\n\nView Image: ${p.images[0]}`;
+            
+            if (navigator.share) {
+                navigator.share({ title: p.name, text: shareText }).catch(console.error);
+            } else {
+                window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+            }
+        }
+
+        function addToCart(id, e) {
+            if(e) e.stopPropagation();
+            const p = window.prods.find(x => x.id === id);
+            const existing = cart.find(item => item.id === id);
+            if(existing) existing.qty += 1;
+            else cart.push({...p, qty: 1});
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const count = cart.reduce((acc, item) => acc + item.qty, 0);
+            const dot = document.getElementById('cartCount');
+            dot.innerText = count;
+            dot.classList.toggle('hidden', count === 0);
+
+            const list = document.getElementById('cartItemsList');
+            list.innerHTML = '';
+            let subtotal = 0;
+            cart.forEach((item, index) => {
+                subtotal += parseInt(item.price) * item.qty;
+                list.innerHTML += `<div class="flex gap-4 bg-gray-50 p-3 rounded-2xl border border-gray-100">
+                    <img src="${item.images[0]}" class="w-16 h-16 object-cover rounded-xl">
+                    <div class="flex-1">
+                        <p class="font-bold text-sm truncate">${item.name}</p>
+                        <p class="text-blue-600 font-black text-xs">Rs. ${item.price} x ${item.qty}</p>
+                    </div>
+                    <button onclick="removeFromCart(${index})" class="text-red-400 px-2"><i class="fa-solid fa-trash-can"></i></button>
+                </div>`;
+            });
+            document.getElementById('cartSubtotal').innerText = `Rs. ${subtotal}`;
+            document.getElementById('cartGrandTotal').innerText = `Rs. ${subtotal + (cart.length > 0 ? 150 : 0)}`;
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function openCart() { document.getElementById('cartModal').classList.remove('hidden'); }
+
+        function checkoutCart() {
+            if(cart.length === 0) return alert("Cart is empty!");
+            isCartOrder = true;
+            closeModal('cartModal');
+            document.getElementById('oModal').classList.remove('hidden');
+            document.getElementById('step1').classList.remove('hidden');
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('uSize').classList.add('hidden'); 
+        }
+
+        function openOrder() { 
+            isCartOrder = false;
+            closeModal('pModal'); 
+            document.getElementById('oModal').classList.remove('hidden'); 
+            document.getElementById('step1').classList.remove('hidden'); 
+            document.getElementById('step2').classList.add('hidden'); 
+            const sizeSelect = document.getElementById('uSize');
+            if(selected.sizes && selected.sizes.length > 0) {
+                sizeSelect.classList.remove('hidden');
+                sizeSelect.innerHTML = '<option value="" disabled selected>Select Size</option>';
+                selected.sizes.forEach(size => { sizeSelect.innerHTML += `<option value="${size}">${size}</option>`; });
+            } else { sizeSelect.classList.add('hidden'); }
+        }
+        
+        function goConfirm() {
+            if(!document.getElementById('uSize').classList.contains('hidden') && !document.getElementById('uSize').value && !isCartOrder) return alert("Select Size!");
+            if(!document.getElementById('uName').value || !document.getElementById('uPhone').value || !document.getElementById('uAddr').value) return alert("Fill all details!");
+            
+            let price = isCartOrder ? cart.reduce((acc, item) => acc + (parseInt(item.price) * item.qty), 0) : parseInt(selected.price);
+
+            document.getElementById('fPrice').innerText = `Rs. ${price}`;
+            document.getElementById('fTotal').innerText = `Rs. ${price + 150}`;
+            document.getElementById('step1').classList.add('hidden'); 
+            document.getElementById('step2').classList.remove('hidden');
+        }
+
+        function processOrder() {
+            if(!currentUser) return alert("Please Login first!");
+            const trx = document.getElementById('uTrx').value;
+            if(!trx) return alert("Please enter Payment Transaction ID!");
+
+            const nm = document.getElementById('uName').value;
+            const ph = document.getElementById('uPhone').value;
+            const ad = document.getElementById('uAddr').value;
+            const cty = document.getElementById('uCity').value;
+            
+            let orderText = "";
+            let totalPrice = 0;
+            let firstImage = "";
+
+            if(isCartOrder) {
+                cart.forEach(item => {
+                    orderText += `• ${item.name} (${item.code}) x ${item.qty} = ${parseInt(item.price) * item.qty}\n`;
+                    totalPrice += parseInt(item.price) * item.qty;
+                });
+                firstImage = cart[0].images[0];
+            } else {
+                const sz = document.getElementById('uSize').value || "N/A";
+                orderText = `• ${selected.name} (${selected.code}) [Size: ${sz}]`;
+                totalPrice = parseInt(selected.price);
+                firstImage = selected.images[0];
+            }
+
+            const totalBill = totalPrice + 150;
+
+            const orderEntry = {
+                userId: currentUser.uid,
+                customerName: nm,
+                details: orderText,
+                total: totalBill,
+                trxId: trx,
+                status: "Pending",
+                date: new Date().toLocaleString(),
+                image: firstImage
+            };
+
+            db.ref('orders').push(orderEntry).then(() => {
+                const msg = encodeURIComponent(`*--- NEW ORDER ---*\n${orderText}\n*Delivery:* Rs. 150\n*Total Bill:* Rs. ${totalBill}\n*Trx ID:* ${trx}\n*Name:* ${nm}\n*Phone:* ${ph}\n*Address:* ${ad}, ${cty}`);
+                window.open(`https://wa.me/923423944508?text=${msg}`, '_blank');
+                cart = []; updateCartUI();
+                closeModal('oModal');
+            });
+        }
+
+        function getPinLocation() {
+            if (navigator.geolocation) {
+                document.getElementById('uAddr').value = "Locating...";
+                navigator.geolocation.getCurrentPosition(async position => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    try {
+                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                        const data = await res.json();
+                        document.getElementById('uAddr').value = data.display_name;
+                        if(data.address && (data.address.city || data.address.town)) {
+                            document.getElementById('uCity').value = data.address.city || data.address.town;
+                        }
+                    } catch(e) { document.getElementById('uAddr').value = "Failed to fetch manually."; }
+                }, () => { alert("Location denied."); document.getElementById('uAddr').value = ""; });
+            }
+        }
+
+        function search() {
+            const val = document.getElementById('search').value.toLowerCase();
+            const grid = document.getElementById('grid'); grid.innerHTML = '';
+            window.prods.filter(p => p.name.toLowerCase().includes(val) || p.code.toLowerCase().includes(val)).forEach(p => {
+                grid.innerHTML += cardTemplate(p);
+            });
+        }
+
+        function filterCat(catName) {
+            const grid = document.getElementById('grid'); grid.innerHTML = '';
+            window.prods.filter(p => p.category === catName).forEach(p => {
+                grid.innerHTML += cardTemplate(p);
+            });
+        }
+
+        function openOrders() {
+            if(!currentUser) return;
+            document.getElementById('historyModal').classList.remove('hidden');
+            const list = document.getElementById('myOrderList');
+            db.ref('orders').orderByChild('userId').equalTo(currentUser.uid).on('value', snap => {
+                list.innerHTML = '';
+                snap.forEach(child => {
+                    const o = child.val();
+                    let statusColor = "text-red-500 bg-red-50";
+                    if(o.status === 'Delivered') statusColor = "text-green-600 bg-green-50";
+                    if(o.status === 'Shipped') statusColor = "text-orange-500 bg-orange-50";
+
+                    list.innerHTML += `<div class="p-4 bg-white rounded-2xl flex gap-4 border border-gray-100 shadow-sm">
+                        <img src="${o.image}" class="w-16 h-16 object-cover rounded-xl border">
+                        <div class="flex-1">
+                            <p class="font-bold text-xs text-gray-800">${o.details.substring(0, 50)}...</p>
+                            <p class="text-[9px] text-gray-400 font-bold uppercase mt-0.5">Trx: ${o.trxId}</p>
+                            <div class="mt-2 inline-block px-2 py-1 rounded-md text-[9px] font-black uppercase ${statusColor}">Status: ${o.status}</div>
+                        </div>
+                    </div>`;
+                });
+            });
+        }
+    </script>
+</body>
+</html>

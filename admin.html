@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Professional Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        /* To style the accordion arrow smoothly */
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <nav class="bg-slate-800 text-white p-4 shadow-lg sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold italic">Admin Dashboard</h1>
+            <a href="index.html" class="bg-blue-600 hover:bg-blue-700 px-4 py-1 rounded text-sm transition">View Shop</a>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto p-4 md:p-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            
+            <div class="lg:col-span-1 space-y-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 sticky top-24">
+                    <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-list-ul text-blue-500"></i> Categories
+                    </h3>
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="catInput" placeholder="New Category" class="flex-1 p-2 border rounded-lg text-sm outline-blue-500">
+                        <button onclick="addCategory()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold">Add</button>
+                    </div>
+                    <ul id="catList" class="space-y-2 max-h-[60vh] overflow-y-auto pr-2"></ul>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3">
+                
+                <div class="flex space-x-2 mb-6 overflow-x-auto pb-2">
+                    <button onclick="switchTab('uploadTab', this)" class="tab-btn active-tab bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md transition whitespace-nowrap">
+                        <i class="fa-solid fa-plus-circle mr-1"></i> Upload / Edit
+                    </button>
+                    <button onclick="switchTab('itemsTab', this)" class="tab-btn bg-white text-gray-600 border px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm hover:bg-gray-50 transition whitespace-nowrap">
+                        <i class="fa-solid fa-boxes-stacked mr-1"></i> Inventory Items
+                    </button>
+                    <button onclick="switchTab('ordersTab', this)" class="tab-btn bg-white text-gray-600 border px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm hover:bg-gray-50 transition whitespace-nowrap">
+                        <i class="fa-solid fa-truck-fast mr-1"></i> Customer Orders
+                    </button>
+                    <button onclick="switchTab('slidesTab', this)" class="tab-btn bg-white text-gray-600 border px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm hover:bg-gray-50 transition whitespace-nowrap">
+                        <i class="fa-solid fa-images mr-1"></i> SlideAds
+                    </button>
+                </div>
+
+                <div id="uploadTab" class="tab-content space-y-6">
+                    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200">
+                        <h3 class="font-bold text-gray-700 mb-6 flex items-center gap-2 text-lg">
+                            <i class="fa-solid fa-upload text-green-500"></i> <span id="formTitle">Upload New Product</span>
+                        </h3>
+                        
+                        <input type="hidden" id="editKey">
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Category</label>
+                                    <select id="pCat" class="w-full p-3 border rounded-xl bg-gray-50 outline-blue-500"></select>
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Product Name</label>
+                                    <input type="text" id="pName" class="w-full p-3 border rounded-xl outline-blue-500">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-500 uppercase">Item Code</label>
+                                        <input type="text" id="pCode" class="w-full p-3 border rounded-xl outline-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-500 uppercase">Price (Rs.)</label>
+                                        <input type="number" id="pPrice" class="w-full p-3 border rounded-xl outline-blue-500">
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 uppercase block mb-2">Available Sizes</label>
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                        <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
+                                            <input type="checkbox" name="pSize" value="Standard" class="w-4 h-4 text-blue-600 rounded"> <span>Standard</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
+                                            <input type="checkbox" name="pSize" value="Small" class="w-4 h-4 text-blue-600 rounded"> <span>Small</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
+                                            <input type="checkbox" name="pSize" value="Medium" class="w-4 h-4 text-blue-600 rounded"> <span>Medium</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
+                                            <input type="checkbox" name="pSize" value="Large" class="w-4 h-4 text-blue-600 rounded"> <span>Large</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
+                                            <input type="checkbox" name="pSize" value="Extra Large" class="w-4 h-4 text-blue-600 rounded"> <span>Extra Large</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Description</label>
+                                    <textarea id="pDesc" rows="4" class="w-full p-3 border rounded-xl outline-blue-500"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                <label class="text-xs font-bold text-gray-500 uppercase">Image URLs (Up to 4)</label>
+                                <input type="text" id="img1" placeholder="Main Image URL" class="w-full p-3 border rounded-xl text-sm bg-white">
+                                <input type="text" id="img2" placeholder="Image URL 2" class="w-full p-3 border rounded-xl text-sm bg-white">
+                                <input type="text" id="img3" placeholder="Image URL 3" class="w-full p-3 border rounded-xl text-sm bg-white">
+                                <input type="text" id="img4" placeholder="Image URL 4" class="w-full p-3 border rounded-xl text-sm bg-white">
+                                
+                                <button id="saveBtn" onclick="uploadProduct()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition mt-4 text-lg">
+                                    Save Product
+                                </button>
+                                <button id="cancelEditBtn" onclick="resetForm()" class="w-full bg-gray-400 hover:bg-gray-500 text-white font-bold py-2.5 rounded-xl hidden transition">
+                                    Cancel Edit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="itemsTab" class="tab-content hidden space-y-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                        <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2 text-lg">
+                            <i class="fa-solid fa-boxes-stacked text-blue-500"></i> Inventory Items
+                        </h3>
+                        <p class="text-xs text-gray-500 mb-4">Click on a category to view its items.</p>
+                        <div id="productList" class="space-y-3"></div>
+                    </div>
+                </div>
+
+                <div id="ordersTab" class="tab-content hidden space-y-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-gray-700 flex items-center gap-2 text-lg">
+                                <i class="fa-solid fa-clipboard-list text-orange-500"></i> Customer Orders
+                            </h3>
+                            <span id="orderBadge" class="bg-orange-100 text-orange-700 text-xs font-bold px-3 py-1 rounded-full border border-orange-200">0 Orders</span>
+                        </div>
+                        <div id="ordersList" class="space-y-4"></div>
+                    </div>
+                </div>
+
+                <div id="slidesTab" class="tab-content hidden space-y-6">
+                    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200">
+                        <h3 class="font-bold text-gray-700 mb-6 flex items-center gap-2 text-lg">
+                            <i class="fa-solid fa-images text-purple-500"></i> Slide Banner Management
+                        </h3>
+                        <div class="space-y-4 max-w-2xl">
+                            <div>
+                                <label class="text-xs font-bold text-gray-500 uppercase">Banner 1 (Main)</label>
+                                <input type="text" id="slide1" placeholder="Image URL 1" class="w-full p-3 border rounded-xl outline-blue-500 text-sm bg-gray-50">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-gray-500 uppercase">Banner 2</label>
+                                <input type="text" id="slide2" placeholder="Image URL 2" class="w-full p-3 border rounded-xl outline-blue-500 text-sm bg-gray-50">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-gray-500 uppercase">Banner 3</label>
+                                <input type="text" id="slide3" placeholder="Image URL 3" class="w-full p-3 border rounded-xl outline-blue-500 text-sm bg-gray-50">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-gray-500 uppercase">Banner 4</label>
+                                <input type="text" id="slide4" placeholder="Image URL 4" class="w-full p-3 border rounded-xl outline-blue-500 text-sm bg-gray-50">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-gray-500 uppercase">Banner 5</label>
+                                <input type="text" id="slide5" placeholder="Image URL 5" class="w-full p-3 border rounded-xl outline-blue-500 text-sm bg-gray-50">
+                            </div>
+                            <button onclick="saveBanners()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition mt-4">
+                                Update Banners
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // FIREBASE SETUP
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQ0Ckzlgy8GV-uP89ypRHwrMX2Wq-2Mok",
+            authDomain: "onlineshoping-bcf3b.firebaseapp.com",
+            databaseURL: "https://onlineshoping-bcf3b-default-rtdb.firebaseio.com/",
+            projectId: "onlineshoping-bcf3b",
+            storageBucket: "onlineshoping-bcf3b.firebasestorage.app",
+            messagingSenderId: "634849561995",
+            appId: "1:634849561995:web:caa5e8916b5489e1f4f38e"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // TABS LOGIC
+        function switchTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn bg-white text-gray-600 border px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm hover:bg-gray-50 transition whitespace-nowrap";
+            });
+            
+            if(btnElement) {
+                btnElement.className = "tab-btn active-tab bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md transition whitespace-nowrap";
+            } else {
+                document.querySelector(`button[onclick*="'${tabId}'"]`).className = "tab-btn active-tab bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md transition whitespace-nowrap";
+            }
+        }
+
+        // LOAD CATEGORIES
+        db.ref('categories').on('value', snap => {
+            const list = document.getElementById('catList');
+            const select = document.getElementById('pCat');
+            list.innerHTML = ''; select.innerHTML = '';
+            snap.forEach(child => {
+                const cat = child.val().name;
+                list.innerHTML += `<li class="flex justify-between items-center bg-blue-50 p-3 rounded-xl text-sm font-bold text-blue-800 border border-blue-100">
+                    ${cat} <button onclick="deleteCat('${child.key}')" class="text-red-500 hover:text-red-700 bg-white p-1.5 rounded-md shadow-sm"><i class="fa-solid fa-trash-can"></i></button>
+                </li>`;
+                
+                // Extra safety for double quotes in category names dropdown
+                const safeCat = cat.replace(/"/g, '&quot;');
+                select.innerHTML += `<option value="${safeCat}">${cat}</option>`;
+            });
+        });
+
+        function addCategory() {
+            const name = document.getElementById('catInput').value.trim(); // Added .trim() to prevent space issues
+            if(name) db.ref('categories').push({name}).then(() => document.getElementById('catInput').value = '');
+        }
+
+        function deleteCat(id) { if(confirm("Are you sure you want to delete this category?")) db.ref('categories').child(id).remove(); }
+
+        // PRODUCT UPLOAD / UPDATE
+        function uploadProduct() {
+            const key = document.getElementById('editKey').value;
+            
+            // Collect Selected Sizes
+            const selectedSizes = [];
+            document.querySelectorAll('input[name="pSize"]:checked').forEach(cb => selectedSizes.push(cb.value));
+
+            const p = {
+                category: document.getElementById('pCat').value,
+                name: document.getElementById('pName').value,
+                code: document.getElementById('pCode').value,
+                price: document.getElementById('pPrice').value,
+                desc: document.getElementById('pDesc').value,
+                sizes: selectedSizes, // Added Sizes to object
+                images: [
+                    document.getElementById('img1').value,
+                    document.getElementById('img2').value,
+                    document.getElementById('img3').value,
+                    document.getElementById('img4').value
+                ].filter(u => u !== "")
+            };
+            
+            if(!p.name || !p.code || !p.images[0]) return alert("Please fill mandatory fields (Name, Code, Main Image)!");
+
+            if(key) {
+                db.ref('products').child(key).update(p).then(() => {
+                    alert("Product Updated Successfully!");
+                    resetForm();
+                });
+            } else {
+                db.ref('products').push(p).then(() => {
+                    alert("Product Saved Successfully!");
+                    resetForm();
+                });
+            }
+        }
+
+        // LOAD INVENTORY ITEMS
+        db.ref('products').on('value', snap => {
+            const list = document.getElementById('productList');
+            list.innerHTML = '';
+            const groupedProducts = {};
+            snap.forEach(child => {
+                const p = child.val(); p.key = child.key;
+                const cat = p.category || "Uncategorized";
+                if (!groupedProducts[cat]) groupedProducts[cat] = [];
+                groupedProducts[cat].push(p);
+            });
+
+            for (const cat in groupedProducts) {
+                let itemsHtml = groupedProducts[cat].map(p => `
+                    <div class="flex flex-wrap items-center gap-4 p-4 border-t border-gray-200 bg-white hover:bg-gray-50 transition">
+                        <img src="${p.images[0]}" class="w-14 h-14 object-cover rounded-xl border border-gray-200 shadow-sm">
+                        <div class="flex-1 min-w-[150px]">
+                            <p class="text-[10px] font-black text-blue-600 uppercase tracking-wider">${p.code}</p>
+                            <h4 class="font-bold text-gray-800 text-sm">${p.name}</h4>
+                            <p class="text-green-600 font-black text-xs mt-0.5">Rs. ${p.price}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="editProd('${p.key}')" class="bg-blue-50 text-blue-600 w-8 h-8 rounded-full hover:bg-blue-600 hover:text-white transition shadow-sm border border-blue-100"><i class="fa-solid fa-pencil text-xs"></i></button>
+                            <button onclick="deleteProd('${p.key}')" class="bg-red-50 text-red-500 w-8 h-8 rounded-full hover:bg-red-600 hover:text-white transition shadow-sm border border-red-100"><i class="fa-solid fa-recycle text-xs"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+
+                list.innerHTML += `<details class="mb-3 bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden group">
+                    <summary class="p-4 font-bold text-gray-700 cursor-pointer flex justify-between items-center bg-gray-50 hover:bg-blue-50 transition select-none">
+                        <span class="flex items-center gap-2"><i class="fa-regular fa-folder-open text-blue-500"></i> ${cat} <span class="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded-full">${groupedProducts[cat].length} Items</span></span>
+                        <i class="fa-solid fa-chevron-down text-gray-400 group-open:rotate-180 transition duration-300"></i>
+                    </summary>
+                    <div class="flex flex-col bg-gray-50/50">${itemsHtml}</div>
+                </details>`;
+            }
+        });
+
+        function editProd(key) {
+            db.ref('products').child(key).once('value', snap => {
+                const p = snap.val();
+                document.getElementById('editKey').value = key;
+                document.getElementById('pCat').value = p.category;
+                document.getElementById('pName').value = p.name;
+                document.getElementById('pCode').value = p.code;
+                document.getElementById('pPrice').value = p.price;
+                document.getElementById('pDesc').value = p.desc;
+                
+                // Clear and Set Checkboxes
+                document.querySelectorAll('input[name="pSize"]').forEach(cb => cb.checked = false);
+                if(p.sizes) {
+                    p.sizes.forEach(s => {
+                        const cb = document.querySelector(`input[name="pSize"][value="${s}"]`);
+                        if(cb) cb.checked = true;
+                    });
+                }
+
+                document.getElementById('img1').value = p.images[0] || '';
+                document.getElementById('img2').value = p.images[1] || '';
+                document.getElementById('img3').value = p.images[2] || '';
+                document.getElementById('img4').value = p.images[3] || '';
+                document.getElementById('formTitle').innerText = "Edit Product Information";
+                document.getElementById('saveBtn').innerText = "Update Product";
+                document.getElementById('saveBtn').classList.replace('bg-green-600', 'bg-blue-600');
+                document.getElementById('cancelEditBtn').classList.remove('hidden');
+                switchTab('uploadTab');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+
+        function resetForm() {
+            document.getElementById('editKey').value = '';
+            document.getElementById('pName').value = '';
+            document.getElementById('pCode').value = '';
+            document.getElementById('pPrice').value = '';
+            document.getElementById('pDesc').value = '';
+            
+            // Reset Checkboxes
+            document.querySelectorAll('input[name="pSize"]').forEach(cb => cb.checked = false);
+
+            document.getElementById('img1').value = '';
+            document.getElementById('img2').value = '';
+            document.getElementById('img3').value = '';
+            document.getElementById('img4').value = '';
+            document.getElementById('formTitle').innerText = "Upload New Product";
+            document.getElementById('saveBtn').innerText = "Save Product";
+            document.getElementById('saveBtn').classList.replace('bg-blue-600', 'bg-green-600');
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        }
+
+        function deleteProd(id) { if(confirm("Permanently delete this product?")) db.ref('products').child(id).remove(); }
+
+        // LOAD ORDERS
+        db.ref('orders').on('value', snap => {
+            const list = document.getElementById('ordersList');
+            list.innerHTML = ''; let count = 0;
+            snap.forEach(child => {
+                count++; const o = child.val();
+                let statusColor = "text-blue-600 border-blue-200 bg-blue-50";
+                if(o.status === "Pending") statusColor = "text-red-600 border-red-200 bg-red-50";
+                if(o.status === "Shipped") statusColor = "text-orange-600 border-orange-200 bg-orange-50";
+                if(o.status === "Delivered") statusColor = "text-green-600 border-green-200 bg-green-50";
+
+                list.innerHTML = `<div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+                    <div class="flex justify-between items-start border-b border-gray-100 pb-4 mb-4">
+                        <div class="flex items-center gap-4">
+                            <img src="${o.image}" class="w-16 h-16 object-cover rounded-xl border border-gray-200">
+                            <div><p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">${o.date || 'New Order'}</p><h4 class="font-bold text-gray-800 text-sm mt-1">${o.itemName}</h4><p class="text-xs text-blue-600 font-bold">Code: ${o.itemCode}</p></div>
+                        </div>
+                        <select onchange="updateOrderStatus('${child.key}', this.value)" class="w-32 text-sm font-bold border rounded-lg p-2 outline-none cursor-pointer ${statusColor}">
+                            <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                            <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                            <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                            <option value="Canceled" ${o.status === 'Canceled' ? 'selected' : ''}>Canceled</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div class="bg-gray-50 p-3 rounded-xl">
+                            <p class="font-medium text-gray-800"><i class="fa-solid fa-phone text-blue-500 mr-1 w-4"></i> ${o.phone}</p>
+                            <p class="text-gray-600 mt-1 text-xs"><i class="fa-solid fa-location-dot text-red-500 mr-1 w-4"></i> ${o.address}</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-xl flex flex-col justify-center">
+                            <div class="flex justify-between text-gray-600 mb-1"><span>Price:</span> <span>Rs. ${o.itemPrice}</span></div>
+                            <div class="flex justify-between font-black text-blue-600 text-base"><span>Total:</span> <span>Rs. ${o.total}</span></div>
+                        </div>
+                    </div>
+                </div>` + list.innerHTML;
+            });
+            document.getElementById('orderBadge').innerText = `${count} Orders`;
+        });
+
+        function updateOrderStatus(id, newStatus) { db.ref('orders').child(id).update({ status: newStatus }); }
+
+        // --- SLIDE ADS LOGIC ---
+        db.ref('banners').on('value', snap => {
+            let i = 1;
+            snap.forEach(child => {
+                if(i <= 5) {
+                    document.getElementById('slide' + i).value = child.val().image || '';
+                    i++;
+                }
+            });
+        });
+
+        function saveBanners() {
+            const bannerUrls = [
+                document.getElementById('slide1').value,
+                document.getElementById('slide2').value,
+                document.getElementById('slide3').value,
+                document.getElementById('slide4').value,
+                document.getElementById('slide5').value
+            ].filter(url => url.trim() !== "");
+
+            if(bannerUrls.length === 0) return alert("Please enter at least one banner URL.");
+
+            db.ref('banners').remove().then(() => {
+                const updates = {};
+                bannerUrls.forEach((url, index) => {
+                    const newKey = db.ref('banners').push().key;
+                    updates[newKey] = { image: url };
+                });
+                db.ref('banners').update(updates).then(() => {
+                    alert("Slide Banners Updated Successfully!");
+                });
+            });
+        }
+    </script>
+</body>
+</html>
