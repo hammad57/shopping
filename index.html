@@ -198,18 +198,29 @@
                     <p class="font-bold text-blue-800 underline">Payment Methods:</p>
                     <p><b>1. Easypaisa:</b> 03423944508 <br> (Name: Muluk Hussain)</p>
                     <p><b>2. National Bank (NBP):</b> <br> 14004260352387 (Name: Muluk Hussain)</p>
-                    <p><b>Instructions:</b> <br> Payment send krny k baad Transection ID likh kr <b>send to whatsapp</b> pe click krin</p>
+                    <p><b>Instructions:</b> <br> Online payment send krny k baad Transaction ID likhein ya phir direct <b>Cash on Delivery</b> select karein.</p>
                 </div>
                 <div class="bg-slate-50 p-4 rounded-2xl mb-4 space-y-2 text-sm">
                     <div class="flex justify-between"><span>Price:</span> <span id="fPrice" class="font-bold"></span></div>
                     <div class="flex justify-between text-blue-600"><span>Delivery:</span> <span class="font-bold">Rs. 150</span></div>
                     <div class="border-t border-dashed pt-2 flex justify-between text-lg font-black"><span>Total:</span> <span id="fTotal" class="text-blue-700"></span></div>
                 </div>
-                <input type="text" id="uTrx" placeholder="Enter Transaction ID" class="w-full p-4 bg-yellow-50 border-2 border-yellow-200 rounded-2xl mb-4 outline-none font-bold text-center placeholder-yellow-600/50">
-                <button onclick="processOrder()" class="w-full bg-green-500 hover:bg-green-600 text-white py-5 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl shadow-green-200 transition">
-                    <i class="fa-brands fa-whatsapp text-2xl"></i> Send to WhatsApp
-                </button>
-                <button onclick="document.getElementById('step2').classList.add('hidden'); document.getElementById('step1').classList.remove('hidden');" class="w-full mt-4 text-gray-400 hover:text-gray-600 text-sm font-bold transition">Back to Edit</button>
+                
+                <input type="text" id="uTrx" placeholder="Transaction ID (For Online Payment)" class="w-full p-4 bg-yellow-50 border-2 border-yellow-200 rounded-2xl mb-4 outline-none font-bold text-center placeholder-yellow-600/50">
+                
+                <div class="flex flex-col gap-3">
+                    <button onclick="processOrder('online')" class="w-full bg-green-500 hover:bg-green-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl shadow-green-200 transition">
+                        <i class="fa-brands fa-whatsapp text-xl"></i> Pay Online & Send
+                    </button>
+                    
+                    <div class="text-center text-gray-400 font-bold text-xs uppercase tracking-widest my-1">OR</div>
+                    
+                    <button onclick="processOrder('cod')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl shadow-blue-200 transition">
+                        <i class="fa-solid fa-hand-holding-dollar text-xl"></i> Cash on Delivery (COD)
+                    </button>
+                </div>
+
+                <button onclick="document.getElementById('step2').classList.add('hidden'); document.getElementById('step1').classList.remove('hidden');" class="w-full mt-5 text-gray-400 hover:text-gray-600 text-sm font-bold transition">Back to Edit</button>
             </div>
         </div>
     </div>
@@ -471,10 +482,14 @@
             document.getElementById('step2').classList.remove('hidden');
         }
 
-        function processOrder() {
+        function processOrder(paymentMethod = 'online') {
             if(!currentUser) return alert("Please Login first!");
-            const trx = document.getElementById('uTrx').value;
-            if(!trx) return alert("Please enter Payment Transaction ID!");
+            
+            let trx = "COD";
+            if (paymentMethod === 'online') {
+                trx = document.getElementById('uTrx').value;
+                if(!trx) return alert("Please enter Payment Transaction ID!");
+            }
 
             const nm = document.getElementById('uName').value;
             const ph = document.getElementById('uPhone').value;
@@ -499,12 +514,14 @@
             }
 
             const totalBill = totalPrice + 150;
+            const pMethodName = paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment';
 
             const orderEntry = {
                 userId: currentUser.uid,
                 customerName: nm,
                 details: orderText,
                 total: totalBill,
+                paymentMethod: pMethodName,
                 trxId: trx,
                 status: "Pending",
                 date: new Date().toLocaleString(),
@@ -512,10 +529,11 @@
             };
 
             db.ref('orders').push(orderEntry).then(() => {
-                const msg = encodeURIComponent(`*--- NEW ORDER ---*\n${orderText}\n*Delivery:* Rs. 150\n*Total Bill:* Rs. ${totalBill}\n*Trx ID:* ${trx}\n*Name:* ${nm}\n*Phone:* ${ph}\n*Address:* ${ad}, ${cty}`);
+                const msg = encodeURIComponent(`*--- NEW ORDER ---*\n${orderText}\n*Delivery:* Rs. 150\n*Total Bill:* Rs. ${totalBill}\n*Method:* ${pMethodName}\n*Trx ID:* ${trx}\n*Name:* ${nm}\n*Phone:* ${ph}\n*Address:* ${ad}, ${cty}`);
                 window.open(`https://wa.me/923423944508?text=${msg}`, '_blank');
                 cart = []; updateCartUI();
                 closeModal('oModal');
+                document.getElementById('uTrx').value = '';
             });
         }
 
