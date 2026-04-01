@@ -140,7 +140,10 @@
                     <input type="tel" id="uPhone" placeholder="Mobile Number" class="w-full p-3 bg-gray-50 rounded-xl text-sm border-none outline-blue-500">
                     <input type="text" id="uCity" placeholder="City" class="w-full p-3 bg-gray-50 rounded-xl text-sm border-none outline-blue-500">
                     <div class="relative">
-                        <textarea id="uAddr" placeholder="Complete Address" class="w-full p-3 bg-gray-50 rounded-xl text-sm border-none outline-blue-500" rows="3"></textarea>
+                        <textarea id="uAddr" placeholder="Complete Address" class="w-full p-3 bg-gray-50 rounded-xl text-sm border-none outline-blue-500 pr-10" rows="3"></textarea>
+                        <button onclick="getLocation()" class="absolute right-2 top-2 w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center hover:bg-blue-100 transition shadow-sm" title="Get current location">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </button>
                     </div>
                 </div>
                 <button onclick="goConfirm()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mt-6 shadow-lg">Confirm Address</button>
@@ -253,6 +256,39 @@
             }
         });
 
+        // Function to get current location address
+        function getLocation() {
+            if (navigator.geolocation) {
+                const addrField = document.getElementById('uAddr');
+                const originalPlaceholder = addrField.placeholder;
+                addrField.placeholder = "Detecting location... Please wait.";
+                
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    try {
+                        // Using a free reverse geocoding API (Nominatim)
+                        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`);
+                        const data = await response.json();
+                        if (data.display_name) {
+                            addrField.value = data.display_name;
+                            addrField.placeholder = originalPlaceholder;
+                        } else {
+                            alert("Address not found.");
+                        }
+                    } catch (error) {
+                        alert("Error fetching address details.");
+                        addrField.placeholder = originalPlaceholder;
+                    }
+                }, (error) => {
+                    alert("Location access denied or unavailable.");
+                    addrField.placeholder = originalPlaceholder;
+                }, { enableHighAccuracy: true });
+            } else {
+                alert("Geolocation is not supported by your browser.");
+            }
+        }
+
         function getIcon(name) {
             let n = name.toLowerCase();
             if(n.includes('mobile')) return 'fa-mobile-screen-button';
@@ -266,29 +302,22 @@
         db.ref('categories').on('value', snap => {
             const slider = document.getElementById('catSlider');
             const side = document.getElementById('sidebarCatList');
-            // Updated ALL button with larger icon and adjusted padding/width
             slider.innerHTML = `<button onclick="filterCat('All')" id="btn-All" class="cat-btn bg-white border min-w-[110px] py-4 rounded-2xl flex flex-col items-center gap-2 active-cat shadow-sm transition"><i class="fa-solid fa-border-all text-3xl"></i><span class="text-[11px] font-bold">ALL</span></button>`;
             
             snap.forEach(child => {
                 const c = child.val();
                 if(c.active !== false) {
                     const name = c.name.trim();
-                    
                     let iconDisplaySlider = '';
                     let iconDisplaySidebar = '';
-                    
                     if (c.image) {
-                        // Enlarge image size to w-12 h-12 for better visibility
                         iconDisplaySlider = `<img src="${c.image}" class="w-12 h-12 object-cover rounded-xl shadow-sm mb-1">`;
                         iconDisplaySidebar = `<img src="${c.image}" class="w-8 h-8 object-cover rounded-lg shadow-sm">`;
                     } else {
-                        // Enlarge FontAwesome icon to text-3xl
                         const icon = getIcon(name);
                         iconDisplaySlider = `<i class="fa-solid ${icon} text-3xl text-blue-500 mb-1"></i>`;
                         iconDisplaySidebar = `<i class="fa-solid ${icon} text-blue-500"></i>`;
                     }
-
-                    // Using min-w-[110px] and py-4 for a balanced look with larger icons
                     slider.innerHTML += `<button onclick="filterCat('${name}')" id="btn-${name}" class="cat-btn bg-white border min-w-[110px] py-4 rounded-2xl flex flex-col items-center gap-2 shadow-sm transition">${iconDisplaySlider}<span class="text-[11px] font-bold uppercase text-center">${name}</span></button>`;
                     side.innerHTML += `<li><button onclick="filterCat('${name}'); closeSidebar();" class="w-full text-left p-3 rounded-xl font-bold flex items-center gap-3 hover:bg-blue-50 transition">${iconDisplaySidebar} ${name}</button></li>`;
                 }
