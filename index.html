@@ -20,8 +20,8 @@
         .payment-option.active { border-color: #2563eb; background-color: #eff6ff; }
         .slider-dot { width: 6px; height: 6px; border-radius: 50%; background: #ddd; transition: 0.3s; }
         .active-dot { background: #2563eb; width: 15px; border-radius: 10px; }
-        /* Zoom Cursor for images */
-        .cursor-zoom { cursor: zoom-in; }
+        /* Full Image Overlay */
+        #fullImageModal img { max-width: 95%; max-height: 95%; object-fit: contain; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-900 font-sans pb-24">
@@ -70,9 +70,7 @@
             <i class="fa-solid fa-magnifying-glass absolute left-4 top-4 text-gray-400"></i>
             <input type="text" id="search" placeholder="Search by name or code..." onkeyup="search()" class="w-full p-4 pl-12 rounded-2xl border-none shadow-sm outline-blue-500 text-sm">
         </div>
-
         <div id="catSlider" class="flex gap-3 overflow-x-auto no-scrollbar snap-x mb-8 pb-2"></div>
-
         <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
     </div>
 
@@ -96,9 +94,9 @@
         </button>
     </div>
 
-    <div id="fsModal" class="fixed inset-0 bg-black/95 hidden z-[120] flex items-center justify-center p-4">
-        <button onclick="closeFullImage()" class="absolute top-6 right-6 text-white text-4xl font-light hover:text-red-500 transition-colors z-[130]">&times;</button>
-        <img id="fullImg" src="" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl">
+    <div id="fullImageModal" class="fixed inset-0 bg-black/95 hidden z-[200] flex items-center justify-center p-4" onclick="closeFullImage()">
+        <button class="absolute top-6 right-6 text-white text-4xl">&times;</button>
+        <img id="fullImageSrc" src="" alt="Full View">
     </div>
 
     <div id="pModal" class="fixed inset-0 bg-black/80 hidden z-[60] flex items-center justify-center p-4">
@@ -119,13 +117,10 @@
                     </div>
                 </div>
                 <p id="mDesc" class="text-gray-500 text-sm mt-4 leading-relaxed"></p>
-                
                 <div id="pOptionsContainer" class="mt-4 mb-2 hidden bg-gray-50 p-3 rounded-xl border border-gray-100">
                     <label class="text-xs font-black text-blue-600 uppercase tracking-wider block mb-1">Select Option</label>
-                    <select id="pOptionsSelect" class="w-full p-2 bg-white border rounded-lg outline-blue-500 text-sm font-bold text-gray-800 cursor-pointer">
-                    </select>
+                    <select id="pOptionsSelect" class="w-full p-2 bg-white border rounded-lg outline-blue-500 text-sm font-bold text-gray-800 cursor-pointer"></select>
                 </div>
-
                 <div class="flex gap-2 mt-6">
                     <button onclick="shareProduct(selected.id)" class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl hover:bg-blue-100 transition"><i class="fa-solid fa-share-nodes"></i></button>
                     <button onclick="toggleLike(selected.id, event)" id="modalLikeIcon" class="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center text-xl transition hover:bg-red-50"><i class="fa-solid fa-heart"></i></button>
@@ -146,15 +141,11 @@
                     <input type="text" id="uCity" placeholder="City" class="w-full p-3 bg-gray-50 rounded-xl text-sm border-none outline-blue-500">
                     <div class="relative">
                         <textarea id="uAddr" placeholder="Complete Address" class="w-full p-3 bg-gray-50 rounded-xl text-sm border-none outline-blue-500" rows="3"></textarea>
-                        <button onclick="getCurrentLocation()" class="absolute bottom-2 right-2 bg-blue-100 text-blue-600 px-3 py-1 rounded-lg text-[10px] font-bold">
-                            <i class="fa-solid fa-location-crosshairs"></i> Current Location
-                        </button>
                     </div>
                 </div>
                 <button onclick="goConfirm()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mt-6 shadow-lg">Confirm Address</button>
                 <button onclick="closeModal('oModal')" class="w-full mt-2 text-gray-400 text-xs font-bold uppercase">Cancel</button>
             </div>
-            
             <div id="step2" class="hidden text-center">
                 <h3 class="text-xl font-black mb-6">Payment Method</h3>
                 <div class="grid grid-cols-2 gap-3 mb-6">
@@ -179,7 +170,6 @@
                 <button onclick="processOrder()" class="w-full bg-green-500 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-xl">
                     <i class="fa-brands fa-whatsapp text-2xl"></i> Send WhatsApp Order
                 </button>
-                <button onclick="document.getElementById('step2').classList.add('hidden'); document.getElementById('step1').classList.remove('hidden');" class="w-full mt-4 text-gray-400 text-xs font-bold">Go Back</button>
             </div>
         </div>
     </div>
@@ -217,16 +207,7 @@
         </div>
     </div>
 
-    <div id="historyModal" class="fixed inset-0 bg-black/80 hidden z-[110] flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-[32px] p-6 max-h-[80vh] overflow-y-auto shadow-2xl">
-            <h2 class="text-xl font-black mb-4">Order History</h2>
-            <div id="myOrderList" class="space-y-3"></div>
-            <button onclick="closeModal('historyModal')" class="w-full mt-6 bg-gray-100 py-3 rounded-xl font-bold">Close</button>
-        </div>
-    </div>
-
     <script>
-        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyBQ0Ckzlgy8GV-uP89ypRHwrMX2Wq-2Mok",
             authDomain: "onlineshoping-bcf3b.firebaseapp.com",
@@ -255,13 +236,17 @@
             document.getElementById('search').value = "";
             if(user) {
                 db.ref(`carts/${user.uid}`).on('value', snap => {
-                    cartItems = []; snap.forEach(child => {
-                        let item = child.val(); item.firebaseKey = child.key; cartItems.push(item);
+                    cartItems = [];
+                    snap.forEach(child => {
+                        let item = child.val();
+                        item.firebaseKey = child.key;
+                        cartItems.push(item);
                     });
                     updateCartUI();
                 });
                 db.ref(`wishlist/${user.uid}`).on('value', snap => {
-                    userWishlist = snap.val() || {}; renderGrid();
+                    userWishlist = snap.val() || {};
+                    renderGrid();
                 });
             } else {
                 cartItems = []; userWishlist = {}; updateCartUI(); renderGrid();
@@ -275,33 +260,28 @@
             if(n.includes('electronic')) return 'fa-plug';
             if(n.includes('shoe')) return 'fa-shoe-prints';
             if(n.includes('cloth')) return 'fa-shirt';
-            if(n.includes('laptop') || n.includes('computer')) return 'fa-laptop';
             return 'fa-tag';
         }
 
         db.ref('categories').on('value', snap => {
             const slider = document.getElementById('catSlider');
             const side = document.getElementById('sidebarCatList');
-            slider.innerHTML = `<button onclick="filterCat('All')" id="btn-All" class="cat-btn bg-white border min-w-[90px] py-3 rounded-2xl flex flex-col items-center gap-1 active-cat shadow-sm transition">
-                <i class="fa-solid fa-border-all text-lg"></i><span class="text-[10px] font-bold">ALL</span>
-            </button>`;
-            side.innerHTML = `<li><button onclick="filterCat('All'); closeSidebar();" class="w-full text-left p-3 rounded-xl font-bold flex items-center gap-3"><i class="fa-solid fa-border-all text-blue-500"></i> All Products</button></li>`;
+            slider.innerHTML = `<button onclick="filterCat('All')" id="btn-All" class="cat-btn bg-white border min-w-[90px] py-3 rounded-2xl flex flex-col items-center gap-1 active-cat shadow-sm transition"><i class="fa-solid fa-border-all text-lg"></i><span class="text-[10px] font-bold">ALL</span></button>`;
             snap.forEach(child => {
                 const c = child.val();
                 if(c.active !== false) {
-                    const name = c.name.trim(); const icon = getIcon(name);
-                    slider.innerHTML += `<button onclick="filterCat('${name}')" id="btn-${name}" class="cat-btn bg-white border min-w-[90px] py-3 rounded-2xl flex flex-col items-center gap-1 shadow-sm transition">
-                        <i class="fa-solid ${icon} text-lg text-blue-500"></i><span class="text-[10px] font-bold uppercase">${name}</span>
-                    </button>`;
-                    side.innerHTML += `<li><button onclick="filterCat('${name}'); closeSidebar();" class="w-full text-left p-3 rounded-xl font-bold flex items-center gap-3 hover:bg-blue-50 transition">
-                        <i class="fa-solid ${icon} text-blue-500"></i> ${name}</button></li>`;
+                    const name = c.name.trim();
+                    const icon = getIcon(name);
+                    slider.innerHTML += `<button onclick="filterCat('${name}')" id="btn-${name}" class="cat-btn bg-white border min-w-[90px] py-3 rounded-2xl flex flex-col items-center gap-1 shadow-sm transition"><i class="fa-solid ${icon} text-lg text-blue-500"></i><span class="text-[10px] font-bold uppercase">${name}</span></button>`;
+                    side.innerHTML += `<li><button onclick="filterCat('${name}'); closeSidebar();" class="w-full text-left p-3 rounded-xl font-bold flex items-center gap-3 hover:bg-blue-50 transition"><i class="fa-solid ${icon} text-blue-500"></i> ${name}</button></li>`;
                 }
             });
         });
 
         db.ref('products').on('value', snap => {
             window.prods = []; snap.forEach(c => {
-                const p = c.val(); p.id = c.key; window.prods.push(p);
+                const p = c.val(); p.id = c.key;
+                window.prods.push(p);
             });
             renderGrid();
         });
@@ -329,15 +309,16 @@
             </div>`;
         };
 
-        // Click to Fullscreen logic
-        function openFullImage(src) {
-            document.getElementById('fullImg').src = src;
-            document.getElementById('fsModal').classList.remove('hidden');
+        // NEW: Full Image Functionality
+        function showFullImage(src) {
+            document.getElementById('fullImageSrc').src = src;
+            document.getElementById('fullImageModal').classList.remove('hidden');
         }
         function closeFullImage() {
-            document.getElementById('fsModal').classList.add('hidden');
+            document.getElementById('fullImageModal').classList.add('hidden');
         }
 
+        // UPDATED: View function with Double Click
         function view(id) {
             selected = window.prods.find(x => x.id === id);
             document.getElementById('mName').innerText = selected.name;
@@ -351,55 +332,69 @@
             if(selected.sizes && selected.sizes.length > 0) {
                 optSelect.innerHTML = `<option value="">-- Choose --</option>` + selected.sizes.map(s => `<option value="${s}">${s}</option>`).join('');
                 optContainer.classList.remove('hidden');
-            } else {
-                optContainer.classList.add('hidden');
-            }
+            } else { optContainer.classList.add('hidden'); }
             
             const slider = document.getElementById('pSlider');
             const dots = document.getElementById('dotsContainer');
             slider.innerHTML = ''; dots.innerHTML = '';
             selected.images.forEach((img, i) => {
-                // Click event added to slider image
-                slider.innerHTML += `<div class="w-full flex-shrink-0 snap-center cursor-zoom"><img src="${img}" class="w-full h-full object-cover" onclick="openFullImage('${img}')"></div>`;
+                // Picture par ondblclick lagaya gaya hai
+                slider.innerHTML += `<div class="w-full flex-shrink-0 snap-center"><img src="${img}" class="w-full h-full object-cover cursor-zoom-in" ondblclick="showFullImage(this.src)"></div>`;
                 dots.innerHTML += `<div class="slider-dot ${i===0?'active-dot':''}"></div>`;
             });
             document.getElementById('pModal').classList.remove('hidden');
         }
 
-        // Cart and Order Logic
+        // UPDATED: Open Wishlist from Firebase
+        function openWishlist() {
+            if(!currentUser) return openAuth();
+            const list = document.getElementById('wishlistItems');
+            list.innerHTML = '';
+            
+            // Firebase wishlist keys se products filter karna
+            const likedItems = window.prods.filter(p => userWishlist[p.id]);
+            
+            if(likedItems.length === 0) {
+                list.innerHTML = `<div class="col-span-2 text-center py-10 text-gray-400 font-bold">No favorites yet!</div>`;
+            } else {
+                likedItems.forEach(p => {
+                    list.innerHTML += `<div class="bg-gray-50 rounded-2xl p-2 border relative" onclick="closeModal('wishlistModal'); view('${p.id}')">
+                        <img src="${p.images[0]}" class="w-full h-24 object-cover rounded-xl mb-2">
+                        <p class="text-[10px] font-bold truncate">${p.name}</p>
+                        <p class="text-blue-600 text-[10px] font-black">Rs. ${p.price}</p>
+                        <button onclick="toggleLike('${p.id}', event)" class="absolute top-3 right-3 text-red-500 bg-white/80 w-6 h-6 rounded-full flex items-center justify-center text-[10px] shadow-sm"><i class="fa-solid fa-trash"></i></button>
+                    </div>`;
+                });
+            }
+            document.getElementById('wishlistModal').classList.remove('hidden');
+        }
+
         function addToCart(id) {
             if(!currentUser) return openAuth();
             const p = window.prods.find(x => x.id === id);
             const optSelect = document.getElementById('pOptionsSelect');
             const variation = (!document.getElementById('pOptionsContainer').classList.contains('hidden')) ? optSelect.value : '';
             if(variation === "" && !document.getElementById('pOptionsContainer').classList.contains('hidden')) return alert("Select Option!");
+
             const cartRef = db.ref(`carts/${currentUser.uid}`);
             cartRef.once('value', snap => {
-                let foundKey = null; snap.forEach(child => { if(child.val().id === id && child.val().variation === variation) foundKey = child.key; });
-                if(foundKey) db.ref(`carts/${currentUser.uid}/${foundKey}`).update({ qty: snap.val()[foundKey].qty + 1 });
-                else cartRef.push({...p, qty: 1, variation: variation});
+                let foundKey = null;
+                snap.forEach(child => { if(child.val().id === id && child.val().variation === variation) foundKey = child.key; });
+                foundKey ? db.ref(`carts/${currentUser.uid}/${foundKey}`).update({ qty: snap.val()[foundKey].qty + 1 }) : cartRef.push({...p, qty: 1, variation: variation});
                 alert("Added!");
             });
         }
 
-        function removeFromCart(key) { if(currentUser) db.ref(`carts/${currentUser.uid}/${key}`).remove(); }
-
         function updateCartUI() {
             const list = document.getElementById('cartItemsList');
             const cTop = document.getElementById('cartCount');
-            const cMob = document.getElementById('cartCountMobile');
             const gTotal = document.getElementById('cartGrandTotal');
             list.innerHTML = ''; let total = 0;
             cartItems.forEach(item => {
                 total += parseInt(item.price) * item.qty;
-                list.innerHTML += `<div class="flex gap-4 items-center bg-gray-50 p-3 rounded-2xl border">
-                    <img src="${item.images[0]}" class="w-12 h-12 rounded-lg object-cover">
-                    <div class="flex-1"><p class="text-xs font-bold">${item.name}</p><p class="text-blue-600 text-xs font-black">Rs. ${item.price} x ${item.qty}</p></div>
-                    <button onclick="removeFromCart('${item.firebaseKey}')" class="text-red-400 p-2"><i class="fa-solid fa-trash"></i></button>
-                </div>`;
+                list.innerHTML += `<div class="flex gap-4 items-center bg-gray-50 p-3 rounded-2xl border"><img src="${item.images[0]}" class="w-12 h-12 rounded-lg object-cover"><div class="flex-1"><p class="text-xs font-bold">${item.name}</p><p class="text-blue-600 text-xs font-black">Rs. ${item.price} x ${item.qty}</p></div><button onclick="removeFromCart('${item.firebaseKey}')" class="text-red-400 p-2"><i class="fa-solid fa-trash"></i></button></div>`;
             });
             cTop.innerText = cartItems.length; cTop.classList.toggle('hidden', cartItems.length === 0);
-            if(cMob) { cMob.innerText = cartItems.length; cMob.classList.toggle('hidden', cartItems.length === 0); }
             gTotal.innerText = 'Rs. ' + total;
         }
 
@@ -409,57 +404,23 @@
             window.prods.filter(p => p.name.toLowerCase().includes(val) || p.code.toLowerCase().includes(val)).forEach(p => grid.innerHTML += cardTemplate(p));
         }
 
-        function setPayment(method) {
-            paymentMethod = method;
-            document.getElementById('payOnline').classList.toggle('active', method === 'Online');
-            document.getElementById('payCOD').classList.toggle('active', method === 'COD');
-            document.getElementById('onlineInfo').classList.toggle('hidden', method === 'COD');
-            let price = isCartOrder ? cartItems.reduce((a,b)=>a+(parseInt(b.price)*b.qty),0) : parseInt(selected.price);
-            let deliveryFee = method === 'COD' ? 150 : 0;
-            document.getElementById('dFee').innerText = 'Rs. ' + deliveryFee;
-            document.getElementById('fTotal').innerText = 'Rs. ' + (price + deliveryFee);
-        }
-
-        function goConfirm() {
-            if(!document.getElementById('uName').value || !document.getElementById('uPhone').value || !document.getElementById('uAddr').value) return alert("Fill all details!");
-            let price = isCartOrder ? cartItems.reduce((a,b)=>a+(parseInt(b.price)*b.qty),0) : parseInt(selected.price);
-            document.getElementById('fPrice').innerText = 'Rs. ' + price;
-            setPayment(paymentMethod);
-            document.getElementById('step1').classList.add('hidden');
-            document.getElementById('step2').classList.remove('hidden');
-        }
-
+        function toggleLike(id, e) { if(e) e.stopPropagation(); if(!currentUser) return openAuth(); const ref = db.ref(`wishlist/${currentUser.uid}/${id}`); userWishlist[id] ? ref.remove() : ref.set(true); }
         function filterCat(name) { activeCategory = name; renderGrid(); document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active-cat', b.id === 'btn-'+name)); }
+        function setPayment(m) { paymentMethod = m; document.getElementById('payOnline').classList.toggle('active', m==='Online'); document.getElementById('payCOD').classList.toggle('active', m==='COD'); document.getElementById('onlineInfo').classList.toggle('hidden', m==='COD'); let p = isCartOrder ? cartItems.reduce((a,b)=>a+(parseInt(b.price)*b.qty),0) : parseInt(selected.price); let d = m==='COD' ? 150 : 0; document.getElementById('dFee').innerText = 'Rs. ' + d; document.getElementById('fTotal').innerText = 'Rs. ' + (p + d); }
+        function goConfirm() { if(!document.getElementById('uName').value || !document.getElementById('uPhone').value || !document.getElementById('uAddr').value) return alert("Fill Details!"); let p = isCartOrder ? cartItems.reduce((a,b)=>a+(parseInt(b.price)*b.qty),0) : parseInt(selected.price); document.getElementById('fPrice').innerText = 'Rs. ' + p; setPayment(paymentMethod); document.getElementById('step1').classList.add('hidden'); document.getElementById('step2').classList.remove('hidden'); }
+        function processOrder() { if(!currentUser) return openAuth(); if(paymentMethod === 'Online' && !document.getElementById('uTrx').value) return alert("Enter TRX ID!"); const details = isCartOrder ? cartItems.map(i => `${i.name} (x${i.qty})`).join(', ') : selected.name; const orderData = { userId: currentUser.uid, details, total: document.getElementById('fTotal').innerText, trxId: document.getElementById('uTrx').value || "COD", customer: { name: document.getElementById('uName').value, phone: document.getElementById('uPhone').value, address: document.getElementById('uAddr').value } }; db.ref('orders').push(orderData).then(() => { window.open(`https://wa.me/923423944508?text=${encodeURIComponent("*ORDER*\n"+details+"\nTotal: "+orderData.total)}`); if(isCartOrder) db.ref(`carts/${currentUser.uid}`).remove(); closeModal('oModal'); }); }
+        
+        function removeFromCart(key) { if(currentUser) db.ref(`carts/${currentUser.uid}/${key}`).remove(); }
         function openSidebar() { document.getElementById('sidebarOverlay').classList.remove('hidden'); document.getElementById('sidebarMenu').classList.remove('-translate-x-full'); }
         function closeSidebar() { document.getElementById('sidebarOverlay').classList.add('hidden'); document.getElementById('sidebarMenu').classList.add('-translate-x-full'); }
         function openCart() { document.getElementById('cartModal').classList.remove('hidden'); }
         function openAuth() { document.getElementById('aModal').classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        function toggleLike(id, e) { if(e) e.stopPropagation(); if(!currentUser) return openAuth(); const ref = db.ref(`wishlist/${currentUser.uid}/${id}`); userWishlist[id] ? ref.remove() : ref.set(true); }
         function checkoutCart() { if(cartItems.length === 0) return alert("Empty!"); isCartOrder = true; closeModal('cartModal'); document.getElementById('oModal').classList.remove('hidden'); }
         function openOrder() { isCartOrder = false; closeModal('pModal'); document.getElementById('oModal').classList.remove('hidden'); }
         function login() { auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).then(()=>closeModal('aModal')).catch(e=>alert(e.message)); }
         function register() { auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).then(()=>closeModal('aModal')).catch(e=>alert(e.message)); }
         function logout() { auth.signOut(); }
-
-        function processOrder() {
-            if(!currentUser) return openAuth();
-            if(paymentMethod === 'Online' && !document.getElementById('uTrx').value) return alert("Enter Transaction ID!");
-            const trx = document.getElementById('uTrx').value || "COD Order";
-            const details = isCartOrder ? cartItems.map(i => `${i.name} (x${i.qty})`).join(', ') : selected.name;
-            const orderData = {
-                userId: currentUser.uid, details, total: document.getElementById('fTotal').innerText, 
-                trxId: trx, status: "Pending", date: new Date().toLocaleString(), 
-                image: isCartOrder ? cartItems[0].images[0] : selected.images[0],
-                method: paymentMethod, customer: { name: document.getElementById('uName').value, phone: document.getElementById('uPhone').value, address: document.getElementById('uAddr').value }
-            };
-            db.ref('orders').push(orderData).then(() => {
-                const msg = encodeURIComponent(`*ORDER*\nItems: ${details}\nTotal: ${orderData.total}\nMethod: ${paymentMethod}\nCustomer: ${orderData.customer.name}\nAddress: ${orderData.customer.address}`);
-                window.open(`https://wa.me/923423944508?text=${msg}`);
-                if(isCartOrder) db.ref(`carts/${currentUser.uid}`).remove();
-                closeModal('oModal');
-            });
-        }
 
         document.getElementById('pSlider').addEventListener('scroll', (e) => {
             const index = Math.round(e.target.scrollLeft / e.target.clientWidth);
