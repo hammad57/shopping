@@ -20,11 +20,9 @@
         .payment-option.active { border-color: #2563eb; background-color: #eff6ff; }
         .slider-dot { width: 6px; height: 6px; border-radius: 50%; background: #ddd; transition: 0.3s; }
         .active-dot { background: #2563eb; width: 15px; border-radius: 10px; }
-        /* Safe area padding for mobile screens */
-        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-900 font-sans">
+<body class="bg-slate-100 text-slate-900 font-sans pb-24">
 
     <nav class="bg-white shadow-sm sticky top-0 z-50 p-4">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
@@ -36,7 +34,7 @@
             </div>
             
             <div class="flex items-center gap-1">
-                <button onclick="openWishlist()" class="text-gray-600 p-2"><i class="fa-solid fa-heart text-xl"></i></button>
+                <button onclick="openWishlist()" class="hidden md:block text-gray-600 p-2"><i class="fa-solid fa-heart text-xl"></i></button>
                 <button onclick="openCart()" class="relative text-gray-600 p-2">
                     <i class="fa-solid fa-cart-shopping text-xl"></i>
                     <span id="cartCount" class="absolute top-0 right-0 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold hidden">0</span>
@@ -59,13 +57,13 @@
         <div class="flex-1 overflow-y-auto p-4 space-y-4">
             <ul id="sidebarCatList" class="space-y-2"></ul>
             <hr>
-            <a href="https://hammad57.github.io/shopping/help.html" class="flex items-center gap-3 p-3 font-bold text-gray-700 hover:bg-gray-50 rounded-xl">
+            <a href="help.html" class="flex items-center gap-3 p-3 font-bold text-gray-700 hover:bg-gray-50 rounded-xl">
                 <i class="fa-solid fa-headset text-blue-500"></i> Help & Support
             </a>
         </div>
     </div>
 
-    <div class="max-w-6xl mx-auto p-4 pb-28">
+    <div class="max-w-6xl mx-auto p-4">
         <div class="relative mb-6">
             <i class="fa-solid fa-magnifying-glass absolute left-4 top-4 text-gray-400"></i>
             <input type="text" id="search" placeholder="Search by name or code..." onkeyup="search()" class="w-full p-4 pl-12 rounded-2xl border-none shadow-sm outline-blue-500 text-sm">
@@ -76,28 +74,24 @@
         <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
     </div>
 
-    <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-[95%] max-w-md bg-white/90 backdrop-blur-xl border border-gray-100 shadow-[0_10px_40px_rgba(0,0,0,0.1)] rounded-[32px] z-40 flex justify-between items-center px-6 py-3 pb-safe">
-        <button onclick="goHome()" class="flex flex-col items-center gap-1 text-gray-400 hover:text-blue-600 transition">
-            <i class="fa-solid fa-house text-[20px]"></i>
-            <span class="text-[9px] font-black uppercase tracking-wider">Home</span>
+    <div class="fixed bottom-0 left-0 w-full bg-white shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)] z-40 flex justify-around p-3 md:hidden rounded-t-[24px] border-t border-gray-100">
+        <button onclick="window.scrollTo(0,0)" class="flex flex-col items-center text-blue-600 transition">
+            <i class="fa-solid fa-house text-xl mb-1"></i>
+            <span class="text-[10px] font-bold">Home</span>
         </button>
-        <button onclick="checkAuthAndOpen(openOrders)" class="flex flex-col items-center gap-1 text-gray-400 hover:text-blue-600 transition">
-            <i class="fa-solid fa-clipboard-list text-[20px]"></i>
-            <span class="text-[9px] font-black uppercase tracking-wider">Orders</span>
+        <button onclick="openSidebar()" class="flex flex-col items-center text-gray-400 hover:text-blue-600 transition">
+            <i class="fa-solid fa-layer-group text-xl mb-1"></i>
+            <span class="text-[10px] font-bold">Categories</span>
         </button>
-        <button onclick="openCart()" class="flex flex-col items-center gap-1 text-gray-400 hover:text-blue-600 transition relative">
-            <i class="fa-solid fa-cart-shopping text-[20px]"></i>
-            <span class="text-[9px] font-black uppercase tracking-wider">Cart</span>
-            <span id="bottomCartCount" class="absolute -top-1 -right-2 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span>
+        <button onclick="openCart()" class="relative flex flex-col items-center text-gray-400 hover:text-blue-600 transition">
+            <i class="fa-solid fa-cart-shopping text-xl mb-1"></i>
+            <span id="cartCountMobile" class="absolute -top-1 right-2 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span>
+            <span class="text-[10px] font-bold">Cart</span>
         </button>
-        <button onclick="checkAuthAndOpen(openWishlist)" class="flex flex-col items-center gap-1 text-gray-400 hover:text-red-500 transition">
-            <i class="fa-solid fa-heart text-[20px]"></i>
-            <span class="text-[9px] font-black uppercase tracking-wider">Likes</span>
+        <button onclick="openWishlist()" class="flex flex-col items-center text-gray-400 hover:text-blue-600 transition">
+            <i class="fa-solid fa-heart text-xl mb-1"></i>
+            <span class="text-[10px] font-bold">Favorites</span>
         </button>
-        <a href="https://hammad57.github.io/shopping/help.html" class="flex flex-col items-center gap-1 text-gray-400 hover:text-blue-600 transition">
-            <i class="fa-solid fa-headset text-[20px]"></i>
-            <span class="text-[9px] font-black uppercase tracking-wider">Help</span>
-        </a>
     </div>
 
     <div id="pModal" class="fixed inset-0 bg-black/80 hidden z-[60] flex items-center justify-center p-4">
@@ -176,7 +170,7 @@
 
                 <div class="bg-slate-50 p-4 rounded-xl mb-4 space-y-1 text-sm font-bold border border-slate-100">
                     <div class="flex justify-between"><span>Subtotal:</span> <span id="fPrice"></span></div>
-                    <div class="flex justify-between text-blue-600"><span>Delivery:</span> <span id="deliveryFeeText">Rs. 0</span></div>
+                    <div class="flex justify-between text-blue-600"><span>Delivery:</span> <span id="dFee">Rs. 0</span></div>
                     <div class="flex justify-between text-lg border-t pt-2 mt-1"><span>Total Bill:</span> <span id="fTotal"></span></div>
                 </div>
 
@@ -267,25 +261,6 @@
                 renderGrid();
             }
         });
-
-        // Naye Helper Functions
-        function goHome() {
-            closeModal('oModal');
-            closeModal('pModal');
-            closeModal('cartModal');
-            closeModal('wishlistModal');
-            closeModal('historyModal');
-            closeModal('aModal');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function checkAuthAndOpen(actionFunc) {
-            if(currentUser) {
-                actionFunc();
-            } else {
-                openAuth();
-            }
-        }
 
         function renderGrid() {
             const grid = document.getElementById('grid'); grid.innerHTML = '';
@@ -383,32 +358,34 @@
             renderGrid();
         });
 
-        // Updated Payment Function for Delivery Charges
+        // NAYA: Delivery aur Payment handle karne ka function
         function setPayment(method) {
             paymentMethod = method;
             document.getElementById('payOnline').classList.toggle('active', method === 'Online');
             document.getElementById('payCOD').classList.toggle('active', method === 'COD');
             document.getElementById('onlineInfo').classList.toggle('hidden', method === 'COD');
 
-            // Delivery Logic Application
-            let deliveryFee = (method === 'COD') ? 150 : 0;
-            document.getElementById('deliveryFeeText').innerText = (deliveryFee > 0) ? 'Rs. ' + deliveryFee : 'Free';
+            // Agar COD ho tou 150 rs fee warna 0
+            let priceStr = document.getElementById('fPrice').innerText.replace('Rs. ', '');
+            let subTotal = parseInt(priceStr) || 0;
+            let deliveryFee = method === 'COD' ? 150 : 0;
             
-            let priceText = document.getElementById('fPrice').innerText.replace('Rs. ', '');
-            let basePrice = parseInt(priceText) || 0;
-            document.getElementById('fTotal').innerText = 'Rs. ' + (basePrice + deliveryFee);
+            document.getElementById('dFee').innerText = 'Rs. ' + deliveryFee;
+            document.getElementById('fTotal').innerText = 'Rs. ' + (subTotal + deliveryFee);
         }
 
+        // NAYA: Confirm Step par bhee calculation update kar di
         function goConfirm() {
             if(!document.getElementById('uName').value || !document.getElementById('uPhone').value || !document.getElementById('uAddr').value) {
                 return alert("Please fill your Name, Phone and Complete Address!");
             }
-            let price = isCartOrder ? cart.reduce((a,b)=>a+(b.price*b.qty),0) : selected.price;
+            let price = isCartOrder ? cart.reduce((a,b)=>a+(parseInt(b.price)*b.qty),0) : parseInt(selected.price);
             document.getElementById('fPrice').innerText = 'Rs. ' + price;
             
-            // Auto Update Total and Delivery based on Active Payment Method
-            setPayment(paymentMethod); 
-
+            let deliveryFee = paymentMethod === 'COD' ? 150 : 0;
+            document.getElementById('dFee').innerText = 'Rs. ' + deliveryFee;
+            document.getElementById('fTotal').innerText = 'Rs. ' + (price + deliveryFee);
+            
             document.getElementById('step1').classList.add('hidden');
             document.getElementById('step2').classList.remove('hidden');
         }
@@ -524,16 +501,16 @@
             document.getElementById('step2').classList.add('hidden'); 
         }
 
-        // Added Logic to Update Bottom Nav Cart Counter
+        // NAYA: Cart update me dono counter update hongay (Top wala aur Mobile wala)
         function updateCartUI() {
             const list = document.getElementById('cartItemsList');
             const count = document.getElementById('cartCount');
-            const bottomCount = document.getElementById('bottomCartCount');
+            const countMobile = document.getElementById('cartCountMobile');
             const total = document.getElementById('cartGrandTotal');
             list.innerHTML = '';
             let grandTotal = 0;
             cart.forEach(item => {
-                grandTotal += item.price * item.qty;
+                grandTotal += parseInt(item.price) * item.qty;
                 const varText = item.variation ? `<span class="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded ml-1 font-bold">${item.variation}</span>` : '';
                 list.innerHTML += `<div class="flex gap-4 items-center bg-gray-50 p-3 rounded-2xl border border-gray-100">
                     <img src="${item.images[0]}" class="w-14 h-14 rounded-xl object-cover object-top border border-gray-200 shadow-sm">
@@ -541,12 +518,13 @@
                     <button onclick="removeFromCart('${item.id}', '${item.variation || ''}')" class="text-red-400 hover:text-red-600 bg-white p-2 rounded-lg shadow-sm border"><i class="fa-solid fa-trash-can"></i></button>
                 </div>`;
             });
+            
             count.innerText = cart.length;
             count.classList.toggle('hidden', cart.length === 0);
             
-            if(bottomCount) {
-                bottomCount.innerText = cart.length;
-                bottomCount.classList.toggle('hidden', cart.length === 0);
+            if(countMobile) {
+                countMobile.innerText = cart.length;
+                countMobile.classList.toggle('hidden', cart.length === 0);
             }
             
             total.innerText = 'Rs. ' + grandTotal;
