@@ -266,28 +266,30 @@
         db.ref('categories').on('value', snap => {
             const slider = document.getElementById('catSlider');
             const side = document.getElementById('sidebarCatList');
-            slider.innerHTML = `<button onclick="filterCat('All')" id="btn-All" class="cat-btn bg-white border min-w-[90px] py-3 rounded-2xl flex flex-col items-center gap-1 active-cat shadow-sm transition"><i class="fa-solid fa-border-all text-lg"></i><span class="text-[10px] font-bold">ALL</span></button>`;
+            // Updated ALL button with larger icon and adjusted padding/width
+            slider.innerHTML = `<button onclick="filterCat('All')" id="btn-All" class="cat-btn bg-white border min-w-[110px] py-4 rounded-2xl flex flex-col items-center gap-2 active-cat shadow-sm transition"><i class="fa-solid fa-border-all text-3xl"></i><span class="text-[11px] font-bold">ALL</span></button>`;
+            
             snap.forEach(child => {
                 const c = child.val();
                 if(c.active !== false) {
                     const name = c.name.trim();
                     
-                    // --- UPDATED LOGIC FOR IMAGE/ICON ---
                     let iconDisplaySlider = '';
                     let iconDisplaySidebar = '';
                     
                     if (c.image) {
-                        // Agar image majood hai toh image show hogi
-                        iconDisplaySlider = `<img src="${c.image}" class="w-7 h-7 object-cover rounded-md shadow-sm">`;
-                        iconDisplaySidebar = `<img src="${c.image}" class="w-6 h-6 object-cover rounded-md shadow-sm">`;
+                        // Enlarge image size to w-12 h-12 for better visibility
+                        iconDisplaySlider = `<img src="${c.image}" class="w-12 h-12 object-cover rounded-xl shadow-sm mb-1">`;
+                        iconDisplaySidebar = `<img src="${c.image}" class="w-8 h-8 object-cover rounded-lg shadow-sm">`;
                     } else {
-                        // Agar image nahi hai toh purana fontawesome icon show hoga
+                        // Enlarge FontAwesome icon to text-3xl
                         const icon = getIcon(name);
-                        iconDisplaySlider = `<i class="fa-solid ${icon} text-lg text-blue-500"></i>`;
+                        iconDisplaySlider = `<i class="fa-solid ${icon} text-3xl text-blue-500 mb-1"></i>`;
                         iconDisplaySidebar = `<i class="fa-solid ${icon} text-blue-500"></i>`;
                     }
 
-                    slider.innerHTML += `<button onclick="filterCat('${name}')" id="btn-${name}" class="cat-btn bg-white border min-w-[90px] py-3 rounded-2xl flex flex-col items-center gap-1 shadow-sm transition">${iconDisplaySlider}<span class="text-[10px] font-bold uppercase">${name}</span></button>`;
+                    // Using min-w-[110px] and py-4 for a balanced look with larger icons
+                    slider.innerHTML += `<button onclick="filterCat('${name}')" id="btn-${name}" class="cat-btn bg-white border min-w-[110px] py-4 rounded-2xl flex flex-col items-center gap-2 shadow-sm transition">${iconDisplaySlider}<span class="text-[11px] font-bold uppercase text-center">${name}</span></button>`;
                     side.innerHTML += `<li><button onclick="filterCat('${name}'); closeSidebar();" class="w-full text-left p-3 rounded-xl font-bold flex items-center gap-3 hover:bg-blue-50 transition">${iconDisplaySidebar} ${name}</button></li>`;
                 }
             });
@@ -434,7 +436,6 @@
         function setPayment(m) { paymentMethod = m; document.getElementById('payOnline').classList.toggle('active', m==='Online'); document.getElementById('payCOD').classList.toggle('active', m==='COD'); document.getElementById('onlineInfo').classList.toggle('hidden', m==='COD'); let p = isCartOrder ? cartItems.reduce((a,b)=>a+(parseInt(b.price)*b.qty),0) : parseInt(selected.price); let d = m==='COD' ? 150 : 0; document.getElementById('dFee').innerText = 'Rs. ' + d; document.getElementById('fTotal').innerText = 'Rs. ' + (p + d); }
         function goConfirm() { if(!document.getElementById('uName').value || !document.getElementById('uPhone').value || !document.getElementById('uAddr').value) return alert("Fill Details!"); let p = isCartOrder ? cartItems.reduce((a,b)=>a+(parseInt(b.price)*b.qty),0) : parseInt(selected.price); document.getElementById('fPrice').innerText = 'Rs. ' + p; setPayment(paymentMethod); document.getElementById('step1').classList.add('hidden'); document.getElementById('step2').classList.remove('hidden'); }
         
-        // --- UPDATED: Process Order with Complete WhatsApp Data ---
         function processOrder() {
             if(!currentUser) return openAuth();
             if(paymentMethod === 'Online' && !document.getElementById('uTrx').value) return alert("Enter TRX ID!");
