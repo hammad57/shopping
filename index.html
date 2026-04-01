@@ -271,9 +271,24 @@
                 const c = child.val();
                 if(c.active !== false) {
                     const name = c.name.trim();
-                    const icon = getIcon(name);
-                    slider.innerHTML += `<button onclick="filterCat('${name}')" id="btn-${name}" class="cat-btn bg-white border min-w-[90px] py-3 rounded-2xl flex flex-col items-center gap-1 shadow-sm transition"><i class="fa-solid ${icon} text-lg text-blue-500"></i><span class="text-[10px] font-bold uppercase">${name}</span></button>`;
-                    side.innerHTML += `<li><button onclick="filterCat('${name}'); closeSidebar();" class="w-full text-left p-3 rounded-xl font-bold flex items-center gap-3 hover:bg-blue-50 transition"><i class="fa-solid ${icon} text-blue-500"></i> ${name}</button></li>`;
+                    
+                    // --- UPDATED LOGIC FOR IMAGE/ICON ---
+                    let iconDisplaySlider = '';
+                    let iconDisplaySidebar = '';
+                    
+                    if (c.image) {
+                        // Agar image majood hai toh image show hogi
+                        iconDisplaySlider = `<img src="${c.image}" class="w-7 h-7 object-cover rounded-md shadow-sm">`;
+                        iconDisplaySidebar = `<img src="${c.image}" class="w-6 h-6 object-cover rounded-md shadow-sm">`;
+                    } else {
+                        // Agar image nahi hai toh purana fontawesome icon show hoga
+                        const icon = getIcon(name);
+                        iconDisplaySlider = `<i class="fa-solid ${icon} text-lg text-blue-500"></i>`;
+                        iconDisplaySidebar = `<i class="fa-solid ${icon} text-blue-500"></i>`;
+                    }
+
+                    slider.innerHTML += `<button onclick="filterCat('${name}')" id="btn-${name}" class="cat-btn bg-white border min-w-[90px] py-3 rounded-2xl flex flex-col items-center gap-1 shadow-sm transition">${iconDisplaySlider}<span class="text-[10px] font-bold uppercase">${name}</span></button>`;
+                    side.innerHTML += `<li><button onclick="filterCat('${name}'); closeSidebar();" class="w-full text-left p-3 rounded-xl font-bold flex items-center gap-3 hover:bg-blue-50 transition">${iconDisplaySidebar} ${name}</button></li>`;
                 }
             });
         });
