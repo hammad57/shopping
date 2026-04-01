@@ -20,6 +20,8 @@
         .payment-option.active { border-color: #2563eb; background-color: #eff6ff; }
         .slider-dot { width: 6px; height: 6px; border-radius: 50%; background: #ddd; transition: 0.3s; }
         .active-dot { background: #2563eb; width: 15px; border-radius: 10px; }
+        /* Safe area padding for mobile screens */
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-900 font-sans">
@@ -57,13 +59,13 @@
         <div class="flex-1 overflow-y-auto p-4 space-y-4">
             <ul id="sidebarCatList" class="space-y-2"></ul>
             <hr>
-            <a href="help.html" class="flex items-center gap-3 p-3 font-bold text-gray-700 hover:bg-gray-50 rounded-xl">
+            <a href="https://hammad57.github.io/shopping/help.html" class="flex items-center gap-3 p-3 font-bold text-gray-700 hover:bg-gray-50 rounded-xl">
                 <i class="fa-solid fa-headset text-blue-500"></i> Help & Support
             </a>
         </div>
     </div>
 
-    <div class="max-w-6xl mx-auto p-4">
+    <div class="max-w-6xl mx-auto p-4 pb-28">
         <div class="relative mb-6">
             <i class="fa-solid fa-magnifying-glass absolute left-4 top-4 text-gray-400"></i>
             <input type="text" id="search" placeholder="Search by name or code..." onkeyup="search()" class="w-full p-4 pl-12 rounded-2xl border-none shadow-sm outline-blue-500 text-sm">
@@ -72,6 +74,30 @@
         <div id="catSlider" class="flex gap-3 overflow-x-auto no-scrollbar snap-x mb-8 pb-2"></div>
 
         <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+    </div>
+
+    <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-[95%] max-w-md bg-white/90 backdrop-blur-xl border border-gray-100 shadow-[0_10px_40px_rgba(0,0,0,0.1)] rounded-[32px] z-40 flex justify-between items-center px-6 py-3 pb-safe">
+        <button onclick="goHome()" class="flex flex-col items-center gap-1 text-gray-400 hover:text-blue-600 transition">
+            <i class="fa-solid fa-house text-[20px]"></i>
+            <span class="text-[9px] font-black uppercase tracking-wider">Home</span>
+        </button>
+        <button onclick="checkAuthAndOpen(openOrders)" class="flex flex-col items-center gap-1 text-gray-400 hover:text-blue-600 transition">
+            <i class="fa-solid fa-clipboard-list text-[20px]"></i>
+            <span class="text-[9px] font-black uppercase tracking-wider">Orders</span>
+        </button>
+        <button onclick="openCart()" class="flex flex-col items-center gap-1 text-gray-400 hover:text-blue-600 transition relative">
+            <i class="fa-solid fa-cart-shopping text-[20px]"></i>
+            <span class="text-[9px] font-black uppercase tracking-wider">Cart</span>
+            <span id="bottomCartCount" class="absolute -top-1 -right-2 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span>
+        </button>
+        <button onclick="checkAuthAndOpen(openWishlist)" class="flex flex-col items-center gap-1 text-gray-400 hover:text-red-500 transition">
+            <i class="fa-solid fa-heart text-[20px]"></i>
+            <span class="text-[9px] font-black uppercase tracking-wider">Likes</span>
+        </button>
+        <a href="https://hammad57.github.io/shopping/help.html" class="flex flex-col items-center gap-1 text-gray-400 hover:text-blue-600 transition">
+            <i class="fa-solid fa-headset text-[20px]"></i>
+            <span class="text-[9px] font-black uppercase tracking-wider">Help</span>
+        </a>
     </div>
 
     <div id="pModal" class="fixed inset-0 bg-black/80 hidden z-[60] flex items-center justify-center p-4">
@@ -150,7 +176,7 @@
 
                 <div class="bg-slate-50 p-4 rounded-xl mb-4 space-y-1 text-sm font-bold border border-slate-100">
                     <div class="flex justify-between"><span>Subtotal:</span> <span id="fPrice"></span></div>
-                    <div class="flex justify-between text-blue-600"><span>Delivery:</span> <span>Rs. 150</span></div>
+                    <div class="flex justify-between text-blue-600"><span>Delivery:</span> <span id="deliveryFeeText">Rs. 0</span></div>
                     <div class="flex justify-between text-lg border-t pt-2 mt-1"><span>Total Bill:</span> <span id="fTotal"></span></div>
                 </div>
 
@@ -241,6 +267,25 @@
                 renderGrid();
             }
         });
+
+        // Naye Helper Functions
+        function goHome() {
+            closeModal('oModal');
+            closeModal('pModal');
+            closeModal('cartModal');
+            closeModal('wishlistModal');
+            closeModal('historyModal');
+            closeModal('aModal');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function checkAuthAndOpen(actionFunc) {
+            if(currentUser) {
+                actionFunc();
+            } else {
+                openAuth();
+            }
+        }
 
         function renderGrid() {
             const grid = document.getElementById('grid'); grid.innerHTML = '';
@@ -338,11 +383,20 @@
             renderGrid();
         });
 
+        // Updated Payment Function for Delivery Charges
         function setPayment(method) {
             paymentMethod = method;
             document.getElementById('payOnline').classList.toggle('active', method === 'Online');
             document.getElementById('payCOD').classList.toggle('active', method === 'COD');
             document.getElementById('onlineInfo').classList.toggle('hidden', method === 'COD');
+
+            // Delivery Logic Application
+            let deliveryFee = (method === 'COD') ? 150 : 0;
+            document.getElementById('deliveryFeeText').innerText = (deliveryFee > 0) ? 'Rs. ' + deliveryFee : 'Free';
+            
+            let priceText = document.getElementById('fPrice').innerText.replace('Rs. ', '');
+            let basePrice = parseInt(priceText) || 0;
+            document.getElementById('fTotal').innerText = 'Rs. ' + (basePrice + deliveryFee);
         }
 
         function goConfirm() {
@@ -351,7 +405,10 @@
             }
             let price = isCartOrder ? cart.reduce((a,b)=>a+(b.price*b.qty),0) : selected.price;
             document.getElementById('fPrice').innerText = 'Rs. ' + price;
-            document.getElementById('fTotal').innerText = 'Rs. ' + (parseInt(price) + 150);
+            
+            // Auto Update Total and Delivery based on Active Payment Method
+            setPayment(paymentMethod); 
+
             document.getElementById('step1').classList.add('hidden');
             document.getElementById('step2').classList.remove('hidden');
         }
@@ -413,7 +470,6 @@
             const optContainer = document.getElementById('pOptionsContainer');
             const optSelect = document.getElementById('pOptionsSelect');
             
-            // Validation: Agar options hain to selection lazmi hai
             if(!optContainer.classList.contains('hidden') && optSelect.value === "") {
                 return alert("Please select a size or color first!");
             }
@@ -468,9 +524,11 @@
             document.getElementById('step2').classList.add('hidden'); 
         }
 
+        // Added Logic to Update Bottom Nav Cart Counter
         function updateCartUI() {
             const list = document.getElementById('cartItemsList');
             const count = document.getElementById('cartCount');
+            const bottomCount = document.getElementById('bottomCartCount');
             const total = document.getElementById('cartGrandTotal');
             list.innerHTML = '';
             let grandTotal = 0;
@@ -485,6 +543,12 @@
             });
             count.innerText = cart.length;
             count.classList.toggle('hidden', cart.length === 0);
+            
+            if(bottomCount) {
+                bottomCount.innerText = cart.length;
+                bottomCount.classList.toggle('hidden', cart.length === 0);
+            }
+            
             total.innerText = 'Rs. ' + grandTotal;
         }
 
