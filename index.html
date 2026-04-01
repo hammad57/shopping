@@ -342,27 +342,19 @@
             document.getElementById('pModal').classList.remove('hidden');
         }
 
-        // --- NEW: Share Product Functionality ---
         function shareProduct(id) {
             const p = window.prods.find(x => x.id === id);
             if(!p) return;
-
             const optSelect = document.getElementById('pOptionsSelect');
             const variation = (!document.getElementById('pOptionsContainer').classList.contains('hidden')) ? optSelect.value : 'N/A';
-            
-            // Constructing Message
             let msg = `*🔥 PRODUCT DETAILS 🔥*\n\n`;
             msg += `*Item:* ${p.name}\n`;
             msg += `*Code:* ${p.code}\n`;
             msg += `*Price:* Rs. ${p.price}\n`;
             msg += `*Option/Size:* ${variation || 'Not selected'}\n`;
             msg += `*Description:* ${p.desc || 'No description available'}\n\n`;
-            
             msg += `*🖼️ Product Images:*\n`;
-            p.images.forEach((img, index) => {
-                msg += `Image ${index + 1}: ${img}\n`;
-            });
-
+            p.images.forEach((img, index) => { msg += `Image ${index + 1}: ${img}\n`; });
             const encodedMsg = encodeURIComponent(msg);
             const whatsappUrl = `https://wa.me/923423944508?text=${encodedMsg}`;
             window.open(whatsappUrl, '_blank');
@@ -394,7 +386,6 @@
             const optSelect = document.getElementById('pOptionsSelect');
             const variation = (!document.getElementById('pOptionsContainer').classList.contains('hidden')) ? optSelect.value : '';
             if(variation === "" && !document.getElementById('pOptionsContainer').classList.contains('hidden')) return alert("Select Option!");
-
             const cartRef = db.ref(`carts/${currentUser.uid}`);
             cartRef.once('value', snap => {
                 let foundKey = null;
@@ -427,7 +418,69 @@
         function filterCat(name) { activeCategory = name; renderGrid(); document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active-cat', b.id === 'btn-'+name)); }
         function setPayment(m) { paymentMethod = m; document.getElementById('payOnline').classList.toggle('active', m==='Online'); document.getElementById('payCOD').classList.toggle('active', m==='COD'); document.getElementById('onlineInfo').classList.toggle('hidden', m==='COD'); let p = isCartOrder ? cartItems.reduce((a,b)=>a+(parseInt(b.price)*b.qty),0) : parseInt(selected.price); let d = m==='COD' ? 150 : 0; document.getElementById('dFee').innerText = 'Rs. ' + d; document.getElementById('fTotal').innerText = 'Rs. ' + (p + d); }
         function goConfirm() { if(!document.getElementById('uName').value || !document.getElementById('uPhone').value || !document.getElementById('uAddr').value) return alert("Fill Details!"); let p = isCartOrder ? cartItems.reduce((a,b)=>a+(parseInt(b.price)*b.qty),0) : parseInt(selected.price); document.getElementById('fPrice').innerText = 'Rs. ' + p; setPayment(paymentMethod); document.getElementById('step1').classList.add('hidden'); document.getElementById('step2').classList.remove('hidden'); }
-        function processOrder() { if(!currentUser) return openAuth(); if(paymentMethod === 'Online' && !document.getElementById('uTrx').value) return alert("Enter TRX ID!"); const details = isCartOrder ? cartItems.map(i => `${i.name} (x${i.qty})`).join(', ') : selected.name; const orderData = { userId: currentUser.uid, details, total: document.getElementById('fTotal').innerText, trxId: document.getElementById('uTrx').value || "COD", customer: { name: document.getElementById('uName').value, phone: document.getElementById('uPhone').value, address: document.getElementById('uAddr').value } }; db.ref('orders').push(orderData).then(() => { window.open(`https://wa.me/923423944508?text=${encodeURIComponent("*ORDER*\n"+details+"\nTotal: "+orderData.total)}`); if(isCartOrder) db.ref(`carts/${currentUser.uid}`).remove(); closeModal('oModal'); }); }
+        
+        // --- UPDATED: Process Order with Complete WhatsApp Data ---
+        function processOrder() {
+            if(!currentUser) return openAuth();
+            if(paymentMethod === 'Online' && !document.getElementById('uTrx').value) return alert("Enter TRX ID!");
+
+            const custName = document.getElementById('uName').value;
+            const custPhone = document.getElementById('uPhone').value;
+            const custCity = document.getElementById('uCity').value;
+            const custAddr = document.getElementById('uAddr').value;
+            const subtotal = document.getElementById('fPrice').innerText;
+            const delivery = document.getElementById('dFee').innerText;
+            const totalBill = document.getElementById('fTotal').innerText;
+            const trxId = document.getElementById('uTrx').value || "COD";
+
+            let msg = `*🚀 NEW ORDER RECEIVED 🚀*\n\n`;
+            msg += `*👤 CUSTOMER INFO*\n`;
+            msg += `Name: ${custName}\n`;
+            msg += `Phone: ${custPhone}\n`;
+            msg += `City: ${custCity}\n`;
+            msg += `Address: ${custAddr}\n\n`;
+
+            msg += `*📦 ITEM DETAILS*\n`;
+            if (isCartOrder) {
+                cartItems.forEach((item, index) => {
+                    msg += `${index + 1}. ${item.name}\n`;
+                    msg += `   Code: ${item.code}\n`;
+                    msg += `   Option: ${item.variation || 'N/A'}\n`;
+                    msg += `   Qty: ${item.qty}\n`;
+                    msg += `   Price: Rs. ${item.price}\n`;
+                    msg += `   Pictures: ${item.images.join(' , ')}\n\n`;
+                });
+            } else {
+                const variation = document.getElementById('pOptionsSelect').value || 'N/A';
+                msg += `Item: ${selected.name}\n`;
+                msg += `Code: ${selected.code}\n`;
+                msg += `Option: ${variation}\n`;
+                msg += `Price: Rs. ${selected.price}\n`;
+                msg += `Pictures: ${selected.images.join(' , ')}\n\n`;
+            }
+
+            msg += `*💰 PRICE DETAIL*\n`;
+            msg += `Subtotal: ${subtotal}\n`;
+            msg += `Delivery: ${delivery}\n`;
+            msg += `*Total Bill: ${totalBill}*\n`;
+            msg += `Payment: ${paymentMethod}\n`;
+            if(paymentMethod === 'Online') msg += `Trx ID: ${trxId}\n`;
+
+            const orderData = { 
+                userId: currentUser.uid, 
+                details: isCartOrder ? cartItems.map(i => i.name).join(', ') : selected.name, 
+                total: totalBill, 
+                trxId: trxId, 
+                customer: { name: custName, phone: custPhone, address: custAddr, city: custCity } 
+            };
+
+            db.ref('orders').push(orderData).then(() => {
+                const encodedMsg = encodeURIComponent(msg);
+                window.open(`https://wa.me/923423944508?text=${encodedMsg}`);
+                if(isCartOrder) db.ref(`carts/${currentUser.uid}`).remove();
+                closeModal('oModal');
+            });
+        }
         
         function removeFromCart(key) { if(currentUser) db.ref(`carts/${currentUser.uid}/${key}`).remove(); }
         function openSidebar() { document.getElementById('sidebarOverlay').classList.remove('hidden'); document.getElementById('sidebarMenu').classList.remove('-translate-x-full'); }
