@@ -20,6 +20,8 @@
         .payment-option.active { border-color: #2563eb; background-color: #eff6ff; }
         .slider-dot { width: 6px; height: 6px; border-radius: 50%; background: #ddd; transition: 0.3s; }
         .active-dot { background: #2563eb; width: 15px; border-radius: 10px; }
+        /* Zoom Cursor for images */
+        .cursor-zoom { cursor: zoom-in; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-900 font-sans pb-24">
@@ -92,6 +94,11 @@
             <i class="fa-solid fa-heart text-xl mb-1"></i>
             <span class="text-[10px] font-bold">Favorites</span>
         </button>
+    </div>
+
+    <div id="fsModal" class="fixed inset-0 bg-black/95 hidden z-[120] flex items-center justify-center p-4">
+        <button onclick="closeFullImage()" class="absolute top-6 right-6 text-white text-4xl font-light hover:text-red-500 transition-colors z-[130]">&times;</button>
+        <img id="fullImg" src="" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl">
     </div>
 
     <div id="pModal" class="fixed inset-0 bg-black/80 hidden z-[60] flex items-center justify-center p-4">
@@ -241,40 +248,26 @@
         let paymentMethod = 'Online';
         let isCartOrder = false;
 
-        // Persistent Cart Listener & Search Clear
         auth.onAuthStateChanged(user => {
             currentUser = user;
             document.getElementById('loginBtn').classList.toggle('hidden', !!user);
             document.getElementById('userInfo').classList.toggle('hidden', !user);
-            
-            // Search field hamesha khali rakhne ke liye
             document.getElementById('search').value = "";
-
             if(user) {
-                // Persistent Cart logic from Firebase
                 db.ref(`carts/${user.uid}`).on('value', snap => {
-                    cartItems = [];
-                    snap.forEach(child => {
-                        let item = child.val();
-                        item.firebaseKey = child.key;
-                        cartItems.push(item);
+                    cartItems = []; snap.forEach(child => {
+                        let item = child.val(); item.firebaseKey = child.key; cartItems.push(item);
                     });
                     updateCartUI();
                 });
-
                 db.ref(`wishlist/${user.uid}`).on('value', snap => {
-                    userWishlist = snap.val() || {};
-                    renderGrid();
+                    userWishlist = snap.val() || {}; renderGrid();
                 });
             } else {
-                cartItems = [];
-                userWishlist = {};
-                updateCartUI();
-                renderGrid();
+                cartItems = []; userWishlist = {}; updateCartUI(); renderGrid();
             }
         });
 
-        // Icon Mapping Logic for Categories
         function getIcon(name) {
             let n = name.toLowerCase();
             if(n.includes('mobile')) return 'fa-mobile-screen-button';
@@ -293,12 +286,10 @@
                 <i class="fa-solid fa-border-all text-lg"></i><span class="text-[10px] font-bold">ALL</span>
             </button>`;
             side.innerHTML = `<li><button onclick="filterCat('All'); closeSidebar();" class="w-full text-left p-3 rounded-xl font-bold flex items-center gap-3"><i class="fa-solid fa-border-all text-blue-500"></i> All Products</button></li>`;
-            
             snap.forEach(child => {
                 const c = child.val();
                 if(c.active !== false) {
-                    const name = c.name.trim();
-                    const icon = getIcon(name);
+                    const name = c.name.trim(); const icon = getIcon(name);
                     slider.innerHTML += `<button onclick="filterCat('${name}')" id="btn-${name}" class="cat-btn bg-white border min-w-[90px] py-3 rounded-2xl flex flex-col items-center gap-1 shadow-sm transition">
                         <i class="fa-solid ${icon} text-lg text-blue-500"></i><span class="text-[10px] font-bold uppercase">${name}</span>
                     </button>`;
@@ -310,8 +301,7 @@
 
         db.ref('products').on('value', snap => {
             window.prods = []; snap.forEach(c => {
-                const p = c.val(); p.id = c.key;
-                window.prods.push(p);
+                const p = c.val(); p.id = c.key; window.prods.push(p);
             });
             renderGrid();
         });
@@ -339,98 +329,13 @@
             </div>`;
         };
 
-        // Persistent Add To Cart
-        function addToCart(id) {
-            if(!currentUser) return openAuth();
-            const p = window.prods.find(x => x.id === id);
-            const optSelect = document.getElementById('pOptionsSelect');
-            const variation = (!document.getElementById('pOptionsContainer').classList.contains('hidden')) ? optSelect.value : '';
-
-            if(variation === "" && !document.getElementById('pOptionsContainer').classList.contains('hidden')) {
-                return alert("Please select an option first!");
-            }
-
-            const cartRef = db.ref(`carts/${currentUser.uid}`);
-            cartRef.once('value', snap => {
-                let foundKey = null;
-                snap.forEach(child => {
-                    let item = child.val();
-                    if(item.id === id && item.variation === variation) foundKey = child.key;
-                });
-
-                if(foundKey) {
-                    db.ref(`carts/${currentUser.uid}/${foundKey}`).update({ qty: snap.val()[foundKey].qty + 1 });
-                } else {
-                    cartRef.push({...p, qty: 1, variation: variation});
-                }
-                alert("Added to cart!");
-            });
+        // Click to Fullscreen logic
+        function openFullImage(src) {
+            document.getElementById('fullImg').src = src;
+            document.getElementById('fsModal').classList.remove('hidden');
         }
-
-        function removeFromCart(key) {
-            if(currentUser) db.ref(`carts/${currentUser.uid}/${key}`).remove();
-        }
-
-        function updateCartUI() {
-            const list = document.getElementById('cartItemsList');
-            const cTop = document.getElementById('cartCount');
-            const cMob = document.getElementById('cartCountMobile');
-            const gTotal = document.getElementById('cartGrandTotal');
-            list.innerHTML = '';
-            let total = 0;
-            
-            cartItems.forEach(item => {
-                total += parseInt(item.price) * item.qty;
-                list.innerHTML += `<div class="flex gap-4 items-center bg-gray-50 p-3 rounded-2xl border">
-                    <img src="${item.images[0]}" class="w-12 h-12 rounded-lg object-cover">
-                    <div class="flex-1">
-                        <p class="text-xs font-bold">${item.name} ${item.variation ? '<span class="text-blue-500 text-[9px]">['+item.variation+']</span>' : ''}</p>
-                        <p class="text-blue-600 text-xs font-black">Rs. ${item.price} x ${item.qty}</p>
-                    </div>
-                    <button onclick="removeFromCart('${item.firebaseKey}')" class="text-red-400 p-2"><i class="fa-solid fa-trash"></i></button>
-                </div>`;
-            });
-            
-            cTop.innerText = cartItems.length;
-            cTop.classList.toggle('hidden', cartItems.length === 0);
-            if(cMob) {
-                cMob.innerText = cartItems.length;
-                cMob.classList.toggle('hidden', cartItems.length === 0);
-            }
-            gTotal.innerText = 'Rs. ' + total;
-        }
-
-        // Search logic
-        function search() {
-            const val = document.getElementById('search').value.toLowerCase();
-            const grid = document.getElementById('grid'); grid.innerHTML = '';
-            window.prods.filter(p => p.name.toLowerCase().includes(val) || p.code.toLowerCase().includes(val)).forEach(p => grid.innerHTML += cardTemplate(p));
-        }
-
-        // Delivery & Payment Logic
-        function setPayment(method) {
-            paymentMethod = method;
-            document.getElementById('payOnline').classList.toggle('active', method === 'Online');
-            document.getElementById('payCOD').classList.toggle('active', method === 'COD');
-            document.getElementById('onlineInfo').classList.toggle('hidden', method === 'COD');
-
-            let price = isCartOrder ? cartItems.reduce((a,b)=>a+(parseInt(b.price)*b.qty),0) : parseInt(selected.price);
-            let deliveryFee = method === 'COD' ? 150 : 0;
-            
-            document.getElementById('dFee').innerText = 'Rs. ' + deliveryFee;
-            document.getElementById('fTotal').innerText = 'Rs. ' + (price + deliveryFee);
-        }
-
-        function goConfirm() {
-            if(!document.getElementById('uName').value || !document.getElementById('uPhone').value || !document.getElementById('uAddr').value) {
-                return alert("Please fill all address details!");
-            }
-            let price = isCartOrder ? cartItems.reduce((a,b)=>a+(parseInt(b.price)*b.qty),0) : parseInt(selected.price);
-            document.getElementById('fPrice').innerText = 'Rs. ' + price;
-            setPayment(paymentMethod); // Recalculate with current method
-            
-            document.getElementById('step1').classList.add('hidden');
-            document.getElementById('step2').classList.remove('hidden');
+        function closeFullImage() {
+            document.getElementById('fsModal').classList.add('hidden');
         }
 
         function view(id) {
@@ -454,13 +359,76 @@
             const dots = document.getElementById('dotsContainer');
             slider.innerHTML = ''; dots.innerHTML = '';
             selected.images.forEach((img, i) => {
-                slider.innerHTML += `<div class="w-full flex-shrink-0 snap-center"><img src="${img}" class="w-full h-full object-cover"></div>`;
+                // Click event added to slider image
+                slider.innerHTML += `<div class="w-full flex-shrink-0 snap-center cursor-zoom"><img src="${img}" class="w-full h-full object-cover" onclick="openFullImage('${img}')"></div>`;
                 dots.innerHTML += `<div class="slider-dot ${i===0?'active-dot':''}"></div>`;
             });
             document.getElementById('pModal').classList.remove('hidden');
         }
 
-        // All Helper Functions
+        // Cart and Order Logic
+        function addToCart(id) {
+            if(!currentUser) return openAuth();
+            const p = window.prods.find(x => x.id === id);
+            const optSelect = document.getElementById('pOptionsSelect');
+            const variation = (!document.getElementById('pOptionsContainer').classList.contains('hidden')) ? optSelect.value : '';
+            if(variation === "" && !document.getElementById('pOptionsContainer').classList.contains('hidden')) return alert("Select Option!");
+            const cartRef = db.ref(`carts/${currentUser.uid}`);
+            cartRef.once('value', snap => {
+                let foundKey = null; snap.forEach(child => { if(child.val().id === id && child.val().variation === variation) foundKey = child.key; });
+                if(foundKey) db.ref(`carts/${currentUser.uid}/${foundKey}`).update({ qty: snap.val()[foundKey].qty + 1 });
+                else cartRef.push({...p, qty: 1, variation: variation});
+                alert("Added!");
+            });
+        }
+
+        function removeFromCart(key) { if(currentUser) db.ref(`carts/${currentUser.uid}/${key}`).remove(); }
+
+        function updateCartUI() {
+            const list = document.getElementById('cartItemsList');
+            const cTop = document.getElementById('cartCount');
+            const cMob = document.getElementById('cartCountMobile');
+            const gTotal = document.getElementById('cartGrandTotal');
+            list.innerHTML = ''; let total = 0;
+            cartItems.forEach(item => {
+                total += parseInt(item.price) * item.qty;
+                list.innerHTML += `<div class="flex gap-4 items-center bg-gray-50 p-3 rounded-2xl border">
+                    <img src="${item.images[0]}" class="w-12 h-12 rounded-lg object-cover">
+                    <div class="flex-1"><p class="text-xs font-bold">${item.name}</p><p class="text-blue-600 text-xs font-black">Rs. ${item.price} x ${item.qty}</p></div>
+                    <button onclick="removeFromCart('${item.firebaseKey}')" class="text-red-400 p-2"><i class="fa-solid fa-trash"></i></button>
+                </div>`;
+            });
+            cTop.innerText = cartItems.length; cTop.classList.toggle('hidden', cartItems.length === 0);
+            if(cMob) { cMob.innerText = cartItems.length; cMob.classList.toggle('hidden', cartItems.length === 0); }
+            gTotal.innerText = 'Rs. ' + total;
+        }
+
+        function search() {
+            const val = document.getElementById('search').value.toLowerCase();
+            const grid = document.getElementById('grid'); grid.innerHTML = '';
+            window.prods.filter(p => p.name.toLowerCase().includes(val) || p.code.toLowerCase().includes(val)).forEach(p => grid.innerHTML += cardTemplate(p));
+        }
+
+        function setPayment(method) {
+            paymentMethod = method;
+            document.getElementById('payOnline').classList.toggle('active', method === 'Online');
+            document.getElementById('payCOD').classList.toggle('active', method === 'COD');
+            document.getElementById('onlineInfo').classList.toggle('hidden', method === 'COD');
+            let price = isCartOrder ? cartItems.reduce((a,b)=>a+(parseInt(b.price)*b.qty),0) : parseInt(selected.price);
+            let deliveryFee = method === 'COD' ? 150 : 0;
+            document.getElementById('dFee').innerText = 'Rs. ' + deliveryFee;
+            document.getElementById('fTotal').innerText = 'Rs. ' + (price + deliveryFee);
+        }
+
+        function goConfirm() {
+            if(!document.getElementById('uName').value || !document.getElementById('uPhone').value || !document.getElementById('uAddr').value) return alert("Fill all details!");
+            let price = isCartOrder ? cartItems.reduce((a,b)=>a+(parseInt(b.price)*b.qty),0) : parseInt(selected.price);
+            document.getElementById('fPrice').innerText = 'Rs. ' + price;
+            setPayment(paymentMethod);
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+        }
+
         function filterCat(name) { activeCategory = name; renderGrid(); document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active-cat', b.id === 'btn-'+name)); }
         function openSidebar() { document.getElementById('sidebarOverlay').classList.remove('hidden'); document.getElementById('sidebarMenu').classList.remove('-translate-x-full'); }
         function closeSidebar() { document.getElementById('sidebarOverlay').classList.add('hidden'); document.getElementById('sidebarMenu').classList.add('-translate-x-full'); }
@@ -468,17 +436,15 @@
         function openAuth() { document.getElementById('aModal').classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         function toggleLike(id, e) { if(e) e.stopPropagation(); if(!currentUser) return openAuth(); const ref = db.ref(`wishlist/${currentUser.uid}/${id}`); userWishlist[id] ? ref.remove() : ref.set(true); }
-        function checkoutCart() { if(cartItems.length === 0) return alert("Cart empty!"); isCartOrder = true; closeModal('cartModal'); document.getElementById('oModal').classList.remove('hidden'); }
+        function checkoutCart() { if(cartItems.length === 0) return alert("Empty!"); isCartOrder = true; closeModal('cartModal'); document.getElementById('oModal').classList.remove('hidden'); }
         function openOrder() { isCartOrder = false; closeModal('pModal'); document.getElementById('oModal').classList.remove('hidden'); }
         function login() { auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).then(()=>closeModal('aModal')).catch(e=>alert(e.message)); }
         function register() { auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).then(()=>closeModal('aModal')).catch(e=>alert(e.message)); }
         function logout() { auth.signOut(); }
-        
-        // WhatsApp Order Process
+
         function processOrder() {
             if(!currentUser) return openAuth();
             if(paymentMethod === 'Online' && !document.getElementById('uTrx').value) return alert("Enter Transaction ID!");
-            
             const trx = document.getElementById('uTrx').value || "COD Order";
             const details = isCartOrder ? cartItems.map(i => `${i.name} (x${i.qty})`).join(', ') : selected.name;
             const orderData = {
@@ -487,7 +453,6 @@
                 image: isCartOrder ? cartItems[0].images[0] : selected.images[0],
                 method: paymentMethod, customer: { name: document.getElementById('uName').value, phone: document.getElementById('uPhone').value, address: document.getElementById('uAddr').value }
             };
-
             db.ref('orders').push(orderData).then(() => {
                 const msg = encodeURIComponent(`*ORDER*\nItems: ${details}\nTotal: ${orderData.total}\nMethod: ${paymentMethod}\nCustomer: ${orderData.customer.name}\nAddress: ${orderData.customer.address}`);
                 window.open(`https://wa.me/923423944508?text=${msg}`);
