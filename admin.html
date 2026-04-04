@@ -13,117 +13,135 @@
     <style>
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
-        .active-tab { background-color: #2563eb !important; color: white !important; }
+        .active-tab { background-color: #2563eb !important; color: white !important; border-color: #2563eb !important; }
+        /* Smooth scrolling for inner sections */
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-50 font-sans text-gray-800">
 
     <nav class="bg-slate-800 text-white p-4 shadow-lg sticky top-0 z-50">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold italic">Admin Dashboard</h1>
-            <a href="index.html" class="bg-blue-600 hover:bg-blue-700 px-4 py-1 rounded text-sm transition">View Shop</a>
+            <h1 class="text-xl font-bold tracking-wide"><i class="fa-solid fa-shield-halved text-blue-400 mr-2"></i>Admin Dashboard</h1>
+            <div class="flex gap-3">
+                <a href="home.html" class="bg-slate-700 hover:bg-slate-600 px-4 py-1.5 rounded-lg text-sm font-semibold transition shadow-sm border border-slate-600"><i class="fa-solid fa-house mr-1"></i> Home</a>
+                <a href="index.html" class="bg-blue-600 hover:bg-blue-500 px-4 py-1.5 rounded-lg text-sm font-semibold transition shadow-sm"><i class="fa-solid fa-store mr-1"></i> View Shop</a>
+            </div>
         </div>
     </nav>
 
     <div class="max-w-6xl mx-auto p-4 md:p-8">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 md:gap-8">
             
             <div class="lg:col-span-1 space-y-6">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                    <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-list-ul text-blue-500"></i> Categories
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="font-extrabold text-gray-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+                        <i class="fa-solid fa-layer-group text-blue-500"></i> Categories
                     </h3>
-                    <div class="flex flex-col gap-2 mb-4">
+                    <div class="flex flex-col gap-3 mb-4">
                         <input type="hidden" id="editCatKey">
-                        <input type="text" id="catInput" placeholder="Category Name" class="p-2 border rounded-lg text-sm outline-blue-500">
+                        <input type="text" id="catInput" placeholder="Category Name" class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 outline-none transition">
+                        <input type="text" id="catImageInput" placeholder="Icon/Image URL (Optional)" class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 outline-none transition">
                         <div class="flex gap-2">
-                            <input type="text" id="catImageInput" placeholder="Icon/Image URL" class="flex-1 p-2 border rounded-lg text-sm outline-blue-500">
-                            <button id="saveCatBtn" onclick="saveCategory()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition">Add</button>
-                            <button id="cancelCatBtn" onclick="resetCatForm()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg text-sm font-bold hidden transition">Cancel</button>
+                            <button id="saveCatBtn" onclick="saveCategory()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold shadow-sm transition transform hover:-translate-y-0.5">Add Category</button>
+                            <button id="cancelCatBtn" onclick="resetCatForm()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2.5 rounded-lg text-sm font-bold hidden transition">Cancel</button>
                         </div>
                     </div>
-                    <ul id="catList" class="space-y-2 max-h-[30vh] overflow-y-auto pr-2"></ul>
+                    <ul id="catList" class="space-y-2 max-h-[35vh] overflow-y-auto custom-scrollbar pr-1"></ul>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                    <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="font-extrabold text-gray-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
                         <i class="fa-solid fa-tags text-purple-500"></i> Manage Options
                     </h3>
-                    <div class="flex gap-2 mb-4">
-                        <input type="text" id="newOptInput" placeholder="e.g. Red, XL" class="flex-1 p-2 border rounded-lg text-sm outline-blue-500">
-                        <button onclick="addGlobalOption()" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-bold">Add</button>
+                    <div class="flex flex-col gap-2 mb-4 bg-purple-50/50 p-3 rounded-xl border border-purple-100">
+                        <select id="optGroupSelect" class="w-full p-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-100 outline-none font-medium text-gray-700">
+                            <option value="Colour">Colour</option>
+                            <option value="Size">Size</option>
+                            <option value="Type">Type</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <div class="flex gap-2">
+                            <input type="text" id="newOptInput" placeholder="e.g. Red, XL" class="flex-1 p-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-100 outline-none transition">
+                            <button onclick="addGlobalOption()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition"><i class="fa-solid fa-plus"></i></button>
+                        </div>
                     </div>
-                    <div id="globalOptionsPreview" class="space-y-2 max-h-[30vh] overflow-y-auto pr-2"></div>
+                    <div id="globalOptionsPreview" class="space-y-1.5 max-h-[35vh] overflow-y-auto custom-scrollbar pr-1"></div>
                 </div>
             </div>
 
             <div class="lg:col-span-3">
-                <div class="flex space-x-2 mb-6 overflow-x-auto pb-2">
-                    <button onclick="switchTab('uploadTab', this)" class="tab-btn active-tab px-5 py-2.5 rounded-xl font-bold text-sm shadow-md transition whitespace-nowrap">
-                        <i class="fa-solid fa-plus-circle mr-1"></i> Upload / Edit
+                <div class="flex space-x-2 mb-6 overflow-x-auto pb-2 custom-scrollbar">
+                    <button onclick="switchTab('uploadTab', this)" class="tab-btn active-tab bg-white text-gray-600 border border-gray-200 px-6 py-3 rounded-xl font-bold text-sm shadow-sm hover:bg-gray-50 transition whitespace-nowrap">
+                        <i class="fa-solid fa-plus-circle mr-2"></i> Upload / Edit Product
                     </button>
-                    <button onclick="switchTab('itemsTab', this)" class="tab-btn bg-white text-gray-600 border px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm hover:bg-gray-50 transition whitespace-nowrap">
-                        <i class="fa-solid fa-boxes-stacked mr-1"></i> Inventory Items
+                    <button onclick="switchTab('itemsTab', this)" class="tab-btn bg-white text-gray-600 border border-gray-200 px-6 py-3 rounded-xl font-bold text-sm shadow-sm hover:bg-gray-50 transition whitespace-nowrap">
+                        <i class="fa-solid fa-boxes-stacked mr-2"></i> Inventory Items
                     </button>
-                    <button onclick="switchTab('ordersTab', this)" class="tab-btn bg-white text-gray-600 border px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm hover:bg-gray-50 transition whitespace-nowrap">
-                        <i class="fa-solid fa-truck-fast mr-1"></i> Customer Orders
+                    <button onclick="switchTab('ordersTab', this)" class="tab-btn bg-white text-gray-600 border border-gray-200 px-6 py-3 rounded-xl font-bold text-sm shadow-sm hover:bg-gray-50 transition whitespace-nowrap flex items-center">
+                        <i class="fa-solid fa-truck-fast mr-2"></i> Customer Orders
                     </button>
                 </div>
 
                 <div id="uploadTab" class="tab-content space-y-6">
-                    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200">
-                        <h3 class="font-bold text-gray-700 mb-6 flex items-center gap-2 text-lg">
-                            <i class="fa-solid fa-upload text-green-500"></i> <span id="formTitle">Upload New Product</span>
+                    <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100">
+                        <h3 class="font-extrabold text-gray-800 mb-6 flex items-center gap-2 text-xl border-b pb-4">
+                            <i class="fa-solid fa-cloud-arrow-up text-green-500"></i> <span id="formTitle">Upload New Product</span>
                         </h3>
                         
                         <input type="hidden" id="editKey">
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-5">
                                 <div>
-                                    <label class="text-xs font-bold text-gray-500 uppercase">Category</label>
-                                    <select id="pCat" class="w-full p-3 border rounded-xl bg-gray-50 outline-blue-500"></select>
+                                    <label class="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider mb-1 block">Category</label>
+                                    <select id="pCat" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-100 outline-none font-semibold text-gray-700 transition"></select>
                                 </div>
                                 <div>
-                                    <label class="text-xs font-bold text-gray-500 uppercase">Product Name</label>
-                                    <input type="text" id="pName" class="w-full p-3 border rounded-xl outline-blue-500">
+                                    <label class="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider mb-1 block">Product Name</label>
+                                    <input type="text" id="pName" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-100 outline-none font-semibold text-gray-800 transition">
                                 </div>
-                                <div class="grid grid-cols-2 gap-3">
+                                <div class="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label class="text-xs font-bold text-gray-500 uppercase">Item Code</label>
-                                        <input type="text" id="pCode" class="w-full p-3 border rounded-xl outline-blue-500">
+                                        <label class="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider mb-1 block">Item Code</label>
+                                        <input type="text" id="pCode" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-100 outline-none font-semibold text-gray-800 transition uppercase">
                                     </div>
                                     <div>
-                                        <label class="text-xs font-bold text-gray-500 uppercase">Price (Rs.)</label>
-                                        <input type="number" id="pPrice" class="w-full p-3 border rounded-xl outline-blue-500">
+                                        <label class="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider mb-1 block">Price (Rs.)</label>
+                                        <input type="number" id="pPrice" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-100 outline-none font-semibold text-blue-700 transition">
                                     </div>
                                 </div>
                                 
-                                <div>
-                                    <label class="text-xs font-bold text-gray-500 uppercase block mb-2">Assign Options (Check to enable)</label>
-                                    <div id="dynamicOptionsContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-100 min-h-[50px]">
+                                <div class="bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                                    <label class="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block mb-3">Assign Options <span class="lowercase text-gray-400 font-normal">(Select categories below)</span></label>
+                                    <div id="dynamicOptionsContainer" class="flex flex-col gap-3 min-h-[50px]">
                                         </div>
                                 </div>
 
                                 <div>
-                                    <label class="text-xs font-bold text-gray-500 uppercase">Description</label>
-                                    <textarea id="pDesc" rows="4" class="w-full p-3 border rounded-xl outline-blue-500"></textarea>
+                                    <label class="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider mb-1 block">Description</label>
+                                    <textarea id="pDesc" rows="4" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-100 outline-none text-sm transition custom-scrollbar"></textarea>
                                 </div>
                             </div>
 
-                            <div class="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
-                                <label class="text-xs font-bold text-gray-500 uppercase">Image URLs (Up to 4)</label>
-                                <input type="text" id="img1" placeholder="Main Image URL" class="w-full p-3 border rounded-xl text-sm bg-white">
-                                <input type="text" id="img2" placeholder="Image URL 2" class="w-full p-3 border rounded-xl text-sm bg-white">
-                                <input type="text" id="img3" placeholder="Image URL 3" class="w-full p-3 border rounded-xl text-sm bg-white">
-                                <input type="text" id="img4" placeholder="Image URL 4" class="w-full p-3 border rounded-xl text-sm bg-white">
+                            <div class="space-y-4 bg-gray-50 p-5 rounded-2xl border border-gray-100 flex flex-col justify-between">
+                                <div class="space-y-3">
+                                    <label class="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block mb-2"><i class="fa-regular fa-images text-blue-500 mr-1"></i> Product Images (URLs)</label>
+                                    <input type="text" id="img1" placeholder="Main Image URL (Required)" class="w-full p-3 border border-gray-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-100 outline-none transition">
+                                    <input type="text" id="img2" placeholder="Image URL 2 (Optional)" class="w-full p-3 border border-gray-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-100 outline-none transition">
+                                    <input type="text" id="img3" placeholder="Image URL 3 (Optional)" class="w-full p-3 border border-gray-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-100 outline-none transition">
+                                    <input type="text" id="img4" placeholder="Image URL 4 (Optional)" class="w-full p-3 border border-gray-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-100 outline-none transition">
+                                </div>
                                 
-                                <button id="saveBtn" onclick="uploadProduct()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition mt-4 text-lg">
-                                    Save Product
-                                </button>
-                                <button id="cancelEditBtn" onclick="resetForm()" class="w-full bg-gray-400 hover:bg-gray-500 text-white font-bold py-2.5 rounded-xl hidden transition mt-2">
-                                    Cancel Edit
-                                </button>
+                                <div class="mt-8 pt-4 border-t border-gray-200">
+                                    <button id="saveBtn" onclick="uploadProduct()" class="w-full bg-green-600 hover:bg-green-500 text-white font-extrabold py-4 rounded-xl shadow-md transition transform hover:-translate-y-0.5 text-lg flex justify-center items-center gap-2">
+                                        <i class="fa-solid fa-check"></i> Save Product
+                                    </button>
+                                    <button id="cancelEditBtn" onclick="resetForm()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 rounded-xl hidden transition mt-3">
+                                        Cancel Edit
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -133,25 +151,25 @@
                     <div id="bulkActions" class="hidden p-4 bg-blue-50 border border-blue-200 rounded-2xl flex flex-wrap items-center justify-between gap-4 shadow-sm">
                         <div class="font-bold text-blue-800 text-sm"><i class="fa-solid fa-check-double mr-1"></i> <span id="selCount">0</span> Items Selected</div>
                         <div class="flex gap-2 flex-1 max-w-sm">
-                            <select id="bulkMoveCat" class="flex-1 p-2.5 rounded-xl border-none shadow-sm text-sm outline-blue-500 font-bold text-gray-700"></select>
+                            <select id="bulkMoveCat" class="flex-1 p-2.5 bg-white rounded-xl border border-blue-100 shadow-sm text-sm outline-none focus:ring-2 focus:ring-blue-200 font-bold text-gray-700 transition"></select>
                             <button onclick="moveSelectedItems()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition shadow-sm">Move</button>
                         </div>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                        <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2 text-lg">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                        <h3 class="font-extrabold text-gray-800 mb-6 flex items-center gap-2 text-xl border-b pb-4">
                             <i class="fa-solid fa-boxes-stacked text-blue-500"></i> Inventory Items
                         </h3>
-                        <div id="productList" class="space-y-3"></div>
+                        <div id="productList" class="space-y-4"></div>
                     </div>
                 </div>
 
                 <div id="ordersTab" class="tab-content hidden space-y-6">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="font-bold text-gray-700 flex items-center gap-2 text-lg">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center mb-6 border-b pb-4">
+                            <h3 class="font-extrabold text-gray-800 flex items-center gap-2 text-xl">
                                 <i class="fa-solid fa-clipboard-list text-orange-500"></i> Customer Orders
                             </h3>
-                            <span id="orderBadge" class="bg-orange-100 text-orange-700 text-xs font-bold px-3 py-1 rounded-full border border-orange-200">0 Orders</span>
+                            <span id="orderBadge" class="bg-orange-50 text-orange-600 text-xs font-black px-4 py-1.5 rounded-full border border-orange-200 shadow-sm">0 Orders</span>
                         </div>
                         <div id="ordersList" class="space-y-4"></div>
                     </div>
@@ -182,31 +200,83 @@
             if(btnElement) btnElement.classList.add('active-tab');
         }
 
-        // --- OPTIONS MANAGEMENT ---
+        // --- OPTIONS MANAGEMENT (UPDATED WITH GROUPS) ---
         db.ref('globalOptions').on('value', snap => {
             const container = document.getElementById('dynamicOptionsContainer');
             const preview = document.getElementById('globalOptionsPreview');
-            container.innerHTML = '';
-            preview.innerHTML = '';
+            
+            // Default Groups
+            const groupedOptions = { Colour: [], Size: [], Type: [], Other: [] };
+            const previews = [];
             
             snap.forEach(child => {
-                const opt = child.val();
-                container.innerHTML += `
-                    <label class="flex items-center space-x-2 text-xs text-gray-700 cursor-pointer bg-white p-2 border rounded-lg hover:border-blue-300 transition">
-                        <input type="checkbox" name="pSize" value="${opt}" class="w-4 h-4 text-blue-600 rounded"> 
-                        <span class="truncate">${opt}</span>
-                    </label>`;
-                preview.innerHTML += `
-                    <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg border text-xs">
-                        <span class="font-bold">${opt}</span>
-                        <button onclick="deleteGlobalOption('${child.key}')" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash-can"></i></button>
+                const val = child.val();
+                let text = val;
+                let group = "Other";
+
+                // Backward compatibility check for old strings vs new objects
+                if (typeof val === 'object' && val !== null) {
+                    text = val.text;
+                    group = val.group || "Other";
+                }
+
+                // Push to correct group array
+                if (!groupedOptions[group]) groupedOptions[group] = []; // Ensure dynamic groups are caught
+                groupedOptions[group].push({ key: child.key, text: text });
+                previews.push({ key: child.key, text: text, group: group });
+            });
+
+            // Render Checkboxes in main form
+            let containerHTML = '';
+            for (const [groupName, opts] of Object.entries(groupedOptions)) {
+                if (opts.length === 0) continue;
+                containerHTML += `
+                    <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm transition hover:border-blue-100">
+                        <h4 class="text-[11px] font-extrabold text-gray-500 uppercase tracking-wider mb-3 pb-2 border-b border-gray-100 flex justify-between items-center">
+                            <span>${groupName}</span>
+                            <span class="text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full text-[10px]">${opts.length}</span>
+                        </h4>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            ${opts.map(opt => `
+                                <label class="flex items-center space-x-2.5 text-xs text-gray-700 cursor-pointer bg-gray-50 p-2 border border-transparent rounded-lg hover:border-blue-300 hover:bg-blue-50/50 transition">
+                                    <input type="checkbox" name="pSize" value="${opt.text}" class="w-4 h-4 text-blue-600 rounded bg-white border-gray-300 focus:ring-blue-500 focus:ring-2"> 
+                                    <span class="truncate font-semibold select-none">${opt.text}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>`;
+            }
+            container.innerHTML = containerHTML || '<p class="text-xs text-gray-400 p-2 text-center bg-white rounded-lg border">No options added yet.</p>';
+            
+            // Render Preview Sidebar
+            let previewHTML = '';
+            previews.forEach(p => {
+                // Determine badge color based on group
+                let badgeColor = p.group === 'Colour' ? 'bg-pink-100 text-pink-700' : 
+                                 p.group === 'Size' ? 'bg-blue-100 text-blue-700' : 
+                                 p.group === 'Type' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600';
+
+                previewHTML += `
+                    <div class="flex justify-between items-center bg-gray-50 hover:bg-white p-2.5 rounded-xl border border-gray-100 hover:border-purple-200 text-xs transition-all mb-1.5 shadow-sm group">
+                        <div class="flex flex-col gap-1">
+                            <span class="font-bold text-gray-800">${p.text}</span>
+                            <span class="${badgeColor} text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider w-max">${p.group}</span>
+                        </div>
+                        <button onclick="deleteGlobalOption('${p.key}')" class="text-gray-400 hover:text-red-500 p-1.5 rounded hover:bg-red-50 transition"><i class="fa-solid fa-trash-can"></i></button>
                     </div>`;
             });
+            preview.innerHTML = previewHTML;
         });
 
         function addGlobalOption() {
             const val = document.getElementById('newOptInput').value.trim();
-            if(val) db.ref('globalOptions').push(val).then(() => document.getElementById('newOptInput').value = '');
+            const groupVal = document.getElementById('optGroupSelect').value;
+            if(val) {
+                // Save as object to maintain category
+                db.ref('globalOptions').push({ text: val, group: groupVal }).then(() => {
+                    document.getElementById('newOptInput').value = '';
+                });
+            }
         }
 
         function deleteGlobalOption(key) {
@@ -225,20 +295,19 @@
                 const c = child.val();
                 const isActive = c.active !== false;
                 
-                // Show Image if available, else a placeholder box
                 const imgDisplay = c.image 
-                    ? `<img src="${c.image}" class="w-6 h-6 object-cover rounded shadow-sm border border-gray-200">` 
-                    : `<div class="w-6 h-6 bg-gray-100 rounded border flex items-center justify-center text-[10px] text-gray-400"><i class="fa-solid fa-image"></i></div>`;
+                    ? `<img src="${c.image}" class="w-8 h-8 object-cover rounded-lg shadow-sm border border-gray-200 bg-white">` 
+                    : `<div class="w-8 h-8 bg-gray-100 rounded-lg border flex items-center justify-center text-gray-400"><i class="fa-solid fa-image text-xs"></i></div>`;
 
-                list.innerHTML += `<li class="flex justify-between items-center bg-white p-2 rounded-lg text-xs font-bold border shadow-sm mb-1 hover:bg-gray-50 transition">
-                    <div class="flex items-center gap-2">
+                list.innerHTML += `<li class="flex justify-between items-center bg-gray-50 hover:bg-white p-2.5 rounded-xl border border-gray-100 hover:border-blue-200 shadow-sm mb-2 transition group">
+                    <div class="flex items-center gap-3">
                         ${imgDisplay}
-                        <span class="${isActive ? 'text-blue-800' : 'text-gray-400 line-through'}">${c.name}</span> 
+                        <span class="${isActive ? 'text-gray-800 font-bold' : 'text-gray-400 line-through font-medium'} text-xs">${c.name}</span> 
                     </div>
-                    <div class="flex gap-1">
-                        <button onclick="editCat('${child.key}')" class="w-6 h-6 rounded bg-blue-50 hover:bg-blue-100 text-blue-500 transition"><i class="fa-solid fa-pencil text-[10px]"></i></button>
-                        <button onclick="toggleCat('${child.key}', ${isActive})" class="w-6 h-6 rounded bg-gray-100 hover:bg-gray-200 transition"><i class="fa-solid ${isActive ? 'fa-eye text-green-500' : 'fa-eye-slash text-gray-500'} text-[10px]"></i></button>
-                        <button onclick="deleteCat('${child.key}')" class="w-6 h-6 rounded bg-red-50 hover:bg-red-100 text-red-500 transition"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
+                    <div class="flex gap-1.5 opacity-80 group-hover:opacity-100 transition">
+                        <button onclick="editCat('${child.key}')" class="w-7 h-7 flex items-center justify-center rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 transition"><i class="fa-solid fa-pencil text-[10px]"></i></button>
+                        <button onclick="toggleCat('${child.key}', ${isActive})" class="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 transition"><i class="fa-solid ${isActive ? 'fa-eye text-green-600' : 'fa-eye-slash text-gray-500'} text-[10px]"></i></button>
+                        <button onclick="deleteCat('${child.key}')" class="w-7 h-7 flex items-center justify-center rounded-lg bg-red-50 hover:bg-red-100 text-red-500 transition"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
                     </div>
                 </li>`;
                 select.innerHTML += `<option value="${c.name}">${c.name}</option>`;
@@ -254,15 +323,9 @@
             if(!name) return alert("Category Name is required!");
 
             if (key) {
-                // Update Existing Category
-                db.ref('categories').child(key).update({ name, image }).then(() => {
-                    resetCatForm();
-                });
+                db.ref('categories').child(key).update({ name, image }).then(() => resetCatForm());
             } else {
-                // Add New Category
-                db.ref('categories').push({ name, image, active: true }).then(() => {
-                    resetCatForm();
-                });
+                db.ref('categories').push({ name, image, active: true }).then(() => resetCatForm());
             }
         }
 
@@ -274,9 +337,9 @@
                 document.getElementById('catImageInput').value = c.image || '';
                 
                 const saveBtn = document.getElementById('saveCatBtn');
-                saveBtn.innerText = "Update";
+                saveBtn.innerText = "Update Category";
                 saveBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-                saveBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+                saveBtn.classList.add('bg-green-600', 'hover:bg-green-500');
                 
                 document.getElementById('cancelCatBtn').classList.remove('hidden');
             });
@@ -288,8 +351,8 @@
             document.getElementById('catImageInput').value = '';
             
             const saveBtn = document.getElementById('saveCatBtn');
-            saveBtn.innerText = "Add";
-            saveBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+            saveBtn.innerText = "Add Category";
+            saveBtn.classList.remove('bg-green-600', 'hover:bg-green-500');
             saveBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
             
             document.getElementById('cancelCatBtn').classList.add('hidden');
@@ -333,7 +396,6 @@
                 document.getElementById('pPrice').value = p.price;
                 document.getElementById('pDesc').value = p.desc;
                 
-                // Reset and set Checkboxes
                 document.querySelectorAll('input[name="pSize"]').forEach(cb => {
                     cb.checked = p.sizes ? p.sizes.includes(cb.value) : false;
                 });
@@ -344,7 +406,9 @@
                 document.getElementById('img4').value = p.images[3] || '';
                 
                 document.getElementById('formTitle').innerText = "Edit Product";
-                document.getElementById('saveBtn').innerText = "Update Product";
+                document.getElementById('saveBtn').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Update Product`;
+                document.getElementById('saveBtn').classList.replace('bg-green-600', 'bg-blue-600');
+                document.getElementById('saveBtn').classList.replace('hover:bg-green-500', 'hover:bg-blue-500');
                 document.getElementById('cancelEditBtn').classList.remove('hidden');
                 switchTab('uploadTab');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -362,8 +426,11 @@
             document.getElementById('img2').value = '';
             document.getElementById('img3').value = '';
             document.getElementById('img4').value = '';
+            
             document.getElementById('formTitle').innerText = "Upload New Product";
-            document.getElementById('saveBtn').innerText = "Save Product";
+            document.getElementById('saveBtn').innerHTML = `<i class="fa-solid fa-check"></i> Save Product`;
+            document.getElementById('saveBtn').classList.replace('bg-blue-600', 'bg-green-600');
+            document.getElementById('saveBtn').classList.replace('hover:bg-blue-500', 'hover:bg-green-500');
             document.getElementById('cancelEditBtn').classList.add('hidden');
         }
 
@@ -381,24 +448,24 @@
 
             for (const cat in grouped) {
                 let itemsHtml = grouped[cat].map(p => `
-                    <div class="flex items-center gap-4 p-3 border-t bg-white">
-                        <input type="checkbox" class="bulk-cb w-4 h-4" value="${p.key}" onchange="checkBulkSelection()">
-                        <img src="${p.images[0]}" class="w-10 h-10 object-cover rounded shadow-sm">
+                    <div class="flex items-center gap-4 p-4 bg-white border-t border-gray-100 hover:bg-gray-50 transition group">
+                        <input type="checkbox" class="bulk-cb w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" value="${p.key}" onchange="checkBulkSelection()">
+                        <img src="${p.images[0]}" class="w-12 h-12 object-cover rounded-xl shadow-sm border border-gray-200">
                         <div class="flex-1">
-                            <h4 class="font-bold text-gray-800 text-xs">${p.name}</h4>
-                            <p class="text-blue-600 font-bold text-[10px]">${p.code} - Rs. ${p.price}</p>
+                            <h4 class="font-extrabold text-gray-800 text-sm mb-0.5">${p.name}</h4>
+                            <p class="text-blue-600 font-bold text-[10px] uppercase tracking-wide bg-blue-50 w-max px-2 py-0.5 rounded">${p.code} - Rs. ${p.price}</p>
                         </div>
-                        <div class="flex gap-2">
-                            <button onclick="editProd('${p.key}')" class="text-blue-500 hover:text-blue-700 transition"><i class="fa-solid fa-pencil"></i></button>
-                            <button onclick="deleteProd('${p.key}')" class="text-red-500 hover:text-red-700 transition"><i class="fa-solid fa-trash-can"></i></button>
+                        <div class="flex gap-2 opacity-70 group-hover:opacity-100 transition">
+                            <button onclick="editProd('${p.key}')" class="w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 transition flex items-center justify-center"><i class="fa-solid fa-pencil text-xs"></i></button>
+                            <button onclick="deleteProd('${p.key}')" class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 transition flex items-center justify-center"><i class="fa-solid fa-trash-can text-xs"></i></button>
                         </div>
                     </div>
                 `).join('');
 
-                list.innerHTML += `<details class="mb-2 border rounded-xl overflow-hidden bg-gray-50">
-                    <summary class="p-3 font-bold text-sm cursor-pointer flex justify-between items-center">
-                        <span>${cat} (${grouped[cat].length})</span>
-                        <i class="fa-solid fa-chevron-down text-gray-400"></i>
+                list.innerHTML += `<details class="mb-3 border border-gray-200 rounded-2xl overflow-hidden bg-gray-50 shadow-sm group">
+                    <summary class="p-4 font-extrabold text-sm cursor-pointer flex justify-between items-center text-gray-700 group-hover:text-blue-600 transition">
+                        <span class="flex items-center gap-2"><i class="fa-solid fa-folder text-blue-400"></i> ${cat} <span class="bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full text-[10px] ml-1">${grouped[cat].length}</span></span>
+                        <i class="fa-solid fa-chevron-down text-gray-400 transition transform group-open:rotate-180"></i>
                     </summary>
                     <div>${itemsHtml}</div>
                 </details>`;
@@ -413,26 +480,41 @@
             list.innerHTML = ''; let count = 0;
             snap.forEach(child => {
                 count++; const o = child.val();
-                list.innerHTML = `<div class="bg-white border rounded-2xl p-4 shadow-sm">
-                    <div class="flex justify-between items-start mb-3 border-b pb-2">
-                        <div class="flex gap-3">
-                            <img src="${o.image}" class="w-12 h-12 object-cover rounded-lg border">
-                            <div><p class="text-[9px] text-gray-400">${o.date}</p><h4 class="font-bold text-xs">${o.details}</h4></div>
+                
+                let statusBadge = o.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
+                                  o.status === 'Shipped' ? 'bg-blue-100 text-blue-700' :
+                                  o.status === 'Delivered' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
+
+                list.innerHTML = `<div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+                    <div class="flex justify-between items-start mb-4 border-b border-gray-100 pb-4">
+                        <div class="flex gap-4">
+                            <img src="${o.image}" class="w-14 h-14 object-cover rounded-xl border border-gray-200 shadow-sm">
+                            <div>
+                                <p class="text-[10px] text-gray-400 font-semibold mb-0.5"><i class="fa-regular fa-calendar mr-1"></i>${o.date}</p>
+                                <h4 class="font-extrabold text-sm text-gray-800">${o.details}</h4>
+                            </div>
                         </div>
-                        <select onchange="updateOrderStatus('${child.key}', this.value)" class="text-[10px] font-bold border rounded p-1">
+                        <select onchange="updateOrderStatus('${child.key}', this.value)" class="${statusBadge} text-xs font-bold border-none rounded-lg p-2 outline-none cursor-pointer focus:ring-2 focus:ring-gray-200">
                             <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
                             <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
                             <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
                             <option value="Canceled" ${o.status === 'Canceled' ? 'selected' : ''}>Canceled</option>
                         </select>
                     </div>
-                    <div class="text-[11px] bg-gray-50 p-2 rounded-lg grid grid-cols-2">
-                        <div><p><b>${o.customer.name}</b></p><p>${o.customer.phone}</p><p class="text-gray-500">${o.customer.address}</p></div>
-                        <div class="text-right"><p>${o.method}</p><p class="text-blue-600 font-black">${o.total}</p></div>
+                    <div class="text-xs bg-gray-50 p-3.5 rounded-xl grid grid-cols-2 border border-gray-100">
+                        <div class="space-y-1">
+                            <p class="font-extrabold text-gray-800"><i class="fa-solid fa-user text-gray-400 mr-1.5"></i>${o.customer.name}</p>
+                            <p class="font-semibold text-gray-600"><i class="fa-solid fa-phone text-gray-400 mr-1.5"></i>${o.customer.phone}</p>
+                            <p class="text-gray-500 mt-1"><i class="fa-solid fa-location-dot text-gray-400 mr-1.5"></i>${o.customer.address}</p>
+                        </div>
+                        <div class="text-right flex flex-col justify-center space-y-1">
+                            <p class="text-gray-500 font-semibold uppercase text-[10px] tracking-widest">${o.method}</p>
+                            <p class="text-blue-600 font-black text-lg">${o.total}</p>
+                        </div>
                     </div>
                 </div>` + list.innerHTML;
             });
-            document.getElementById('orderBadge').innerText = `${count} Orders`;
+            document.getElementById('orderBadge').innerText = `${count} Total Orders`;
         });
 
         function updateOrderStatus(id, status) { db.ref('orders').child(id).update({ status }); }
@@ -450,7 +532,11 @@
             if(confirm(`Move ${checked.length} items to ${target}?`)) {
                 const updates = {};
                 checked.forEach(cb => updates[`${cb.value}/category`] = target);
-                db.ref('products').update(updates).then(() => alert("Moved!"));
+                db.ref('products').update(updates).then(() => {
+                    alert("Items Moved Successfully!");
+                    document.querySelectorAll('.bulk-cb:checked').forEach(cb => cb.checked = false);
+                    checkBulkSelection();
+                });
             }
         }
     </script>
