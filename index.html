@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -16,7 +18,10 @@
         .snap-x { scroll-snap-type: x mandatory; }
         .snap-center { scroll-snap-align: center; }
         .liked { color: #ef4444 !important; }
-        .active-cat { background-color: #2563eb !important; color: white !important; border-color: #2563eb !important; }
+        /* Professional Category Active State */
+        .active-cat { border-color: #2563eb !important; background-color: #eff6ff !important; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2) !important; }
+        .active-cat span { color: #2563eb !important; }
+        
         .payment-option.active { border-color: #2563eb; background-color: #eff6ff; }
         .slider-dot { width: 6px; height: 6px; border-radius: 50%; background: #ddd; transition: 0.3s; }
         .active-dot { background: #2563eb; width: 15px; border-radius: 10px; }
@@ -29,7 +34,7 @@
     <nav class="bg-white shadow-sm sticky top-0 z-50 p-4">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-4">
-                <button onclick="openSidebar()" class="text-gray-600 text-xl h-9 w-9 flex items-center justify-center border rounded-full bg-gray-50">
+                <button onclick="openSidebar()" class="text-gray-600 text-xl h-9 w-9 flex items-center justify-center border rounded-full bg-gray-50 hover:bg-gray-100 transition">
                     <i class="fa-solid fa-bars"></i>
                 </button>
                 <h1 class="text-2xl font-black text-blue-600 tracking-tighter">STORE</h1>
@@ -52,15 +57,25 @@
 
     <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 hidden z-[80] backdrop-blur-sm" onclick="closeSidebar()"></div>
     <div id="sidebarMenu" class="fixed top-0 left-0 w-72 h-full bg-white z-[90] transform -translate-x-full transition-transform duration-300 flex flex-col shadow-2xl">
-        <div class="p-6 border-b flex justify-between items-center bg-blue-600 text-white">
-            <h2 class="font-bold text-xl">Main Menu</h2>
-            <button onclick="closeSidebar()" class="text-2xl">×</button>
+        <div class="p-6 border-b flex justify-between items-start bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-800 text-white relative overflow-hidden">
+            <div class="absolute -right-4 -bottom-4 opacity-10 pointer-events-none">
+                <i class="fa-solid fa-store text-8xl"></i>
+            </div>
+            <h2 class="font-extrabold text-xl leading-tight flex flex-col items-start gap-1 relative z-10" style="font-family: 'Poppins', sans-serif;">
+                <span class="flex items-center gap-2 text-yellow-300 text-sm tracking-widest uppercase mb-1">
+                    <i class="fa-solid fa-shop"></i> Welcome
+                </span>
+                <span style="background: linear-gradient(to right, #ffffff, #fef08a); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    Hammad Online<br>Shopping Centre
+                </span>
+            </h2>
+            <button onclick="closeSidebar()" class="text-3xl hover:text-red-300 transition relative z-10 leading-none">&times;</button>
         </div>
         <div class="flex-1 overflow-y-auto p-4 space-y-4">
             <ul id="sidebarCatList" class="space-y-2"></ul>
             <hr>
-            <a href="#" class="flex items-center gap-3 p-3 font-bold text-gray-700 hover:bg-gray-50 rounded-xl">
-                <i class="fa-solid fa-headset text-blue-500"></i> Help & Support
+            <a href="#" class="flex items-center gap-3 p-3 font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition">
+                <i class="fa-solid fa-headset"></i> Help & Support
             </a>
         </div>
     </div>
@@ -70,7 +85,7 @@
             <i class="fa-solid fa-magnifying-glass absolute left-4 top-4 text-gray-400"></i>
             <input type="text" id="search" placeholder="Search by name or code..." onkeyup="search()" class="w-full p-4 pl-12 rounded-2xl border-none shadow-sm outline-blue-500 text-sm">
         </div>
-        <div id="catSlider" class="flex gap-3 overflow-x-auto no-scrollbar snap-x mb-8 pb-2"></div>
+        <div id="catSlider" class="flex gap-4 overflow-x-auto no-scrollbar snap-x mb-8 pb-4 pt-1 px-1"></div>
         <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
     </div>
 
@@ -103,6 +118,10 @@
         <div class="bg-white w-full max-w-md rounded-[32px] overflow-hidden relative flex flex-col max-h-[90vh]">
             <button onclick="closeModal('pModal')" class="absolute top-4 right-4 bg-white rounded-full w-8 h-8 z-50 font-bold shadow-lg flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition">×</button>
             <div class="relative">
+                <div class="absolute top-4 left-1/2 -translate-x-1/2 bg-black/70 text-white text-[10px] font-bold px-3 py-1.5 rounded-full z-10 flex items-center gap-2 backdrop-blur-sm pointer-events-none shadow-lg border border-white/20 animate-pulse">
+                    <i class="fa-solid fa-hand-pointer"></i> Double click picture for full size
+                </div>
+                
                 <div id="pSlider" class="w-full h-72 flex overflow-x-auto snap-x no-scrollbar scroll-smooth"></div>
                 <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1" id="dotsContainer"></div>
             </div>
@@ -110,7 +129,7 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <h2 id="mName" class="text-xl font-black text-gray-800"></h2>
-                        <span id="mCode" class="text-[10px] text-blue-600 font-bold uppercase"></span>
+                        <span id="mCode" class="text-[10px] text-blue-600 font-bold uppercase tracking-wider bg-blue-50 px-2 py-1 rounded-md"></span>
                     </div>
                     <div class="text-right">
                         <p class="text-2xl font-black text-green-600">Rs. <span id="mPrice"></span></p>
@@ -256,7 +275,6 @@
             }
         });
 
-        // Function to get current location address
         function getLocation() {
             if (navigator.geolocation) {
                 const addrField = document.getElementById('uAddr');
@@ -267,7 +285,6 @@
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
                     try {
-                        // Using a free reverse geocoding API (Nominatim)
                         const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`);
                         const data = await response.json();
                         if (data.display_name) {
@@ -302,7 +319,10 @@
         db.ref('categories').on('value', snap => {
             const slider = document.getElementById('catSlider');
             const side = document.getElementById('sidebarCatList');
-            slider.innerHTML = `<button onclick="filterCat('All')" id="btn-All" class="cat-btn bg-white border min-w-[110px] py-4 rounded-2xl flex flex-col items-center gap-2 active-cat shadow-sm transition"><i class="fa-solid fa-border-all text-3xl"></i><span class="text-[11px] font-bold">ALL</span></button>`;
+            // Professional All Button
+            slider.innerHTML = `<button onclick="filterCat('All')" id="btn-All" class="cat-btn flex-shrink-0 bg-white border border-gray-200 w-[110px] h-[120px] rounded-[24px] flex flex-col items-center justify-center gap-3 active-cat hover:shadow-md transition-all duration-300 group snap-center"><div class="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center group-hover:scale-110 group-hover:bg-blue-100 transition-all"><i class="fa-solid fa-border-all text-2xl text-blue-500"></i></div><span class="text-[11px] font-extrabold uppercase tracking-wide text-gray-600 transition-colors">ALL</span></button>`;
+            
+            side.innerHTML = '';
             
             snap.forEach(child => {
                 const c = child.val();
@@ -311,18 +331,46 @@
                     let iconDisplaySlider = '';
                     let iconDisplaySidebar = '';
                     if (c.image) {
-                        iconDisplaySlider = `<img src="${c.image}" class="w-12 h-12 object-cover rounded-xl shadow-sm mb-1">`;
-                        iconDisplaySidebar = `<img src="${c.image}" class="w-8 h-8 object-cover rounded-lg shadow-sm">`;
+                        iconDisplaySlider = `<img src="${c.image}" class="w-14 h-14 object-cover rounded-full shadow-sm group-hover:scale-110 transition-transform">`;
+                        iconDisplaySidebar = `<img src="${c.image}" class="w-8 h-8 object-cover rounded-full shadow-sm border border-gray-100">`;
                     } else {
                         const icon = getIcon(name);
-                        iconDisplaySlider = `<i class="fa-solid ${icon} text-3xl text-blue-500 mb-1"></i>`;
-                        iconDisplaySidebar = `<i class="fa-solid ${icon} text-blue-500"></i>`;
+                        iconDisplaySlider = `<div class="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center group-hover:scale-110 group-hover:bg-blue-100 transition-all"><i class="fa-solid ${icon} text-2xl text-blue-500"></i></div>`;
+                        iconDisplaySidebar = `<div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center"><i class="fa-solid ${icon} text-blue-500 text-sm"></i></div>`;
                     }
-                    slider.innerHTML += `<button onclick="filterCat('${name}')" id="btn-${name}" class="cat-btn bg-white border min-w-[110px] py-4 rounded-2xl flex flex-col items-center gap-2 shadow-sm transition">${iconDisplaySlider}<span class="text-[11px] font-bold uppercase text-center">${name}</span></button>`;
-                    side.innerHTML += `<li><button onclick="filterCat('${name}'); closeSidebar();" class="w-full text-left p-3 rounded-xl font-bold flex items-center gap-3 hover:bg-blue-50 transition">${iconDisplaySidebar} ${name}</button></li>`;
+                    // Professional Category Cards
+                    slider.innerHTML += `<button onclick="filterCat('${name}')" id="btn-${name}" class="cat-btn flex-shrink-0 bg-white border border-gray-200 w-[110px] h-[120px] rounded-[24px] flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all duration-300 group snap-center">${iconDisplaySlider}<span class="text-[10px] font-extrabold uppercase text-center text-gray-600 leading-tight px-1 transition-colors">${name}</span></button>`;
+                    side.innerHTML += `<li><button onclick="filterCat('${name}'); closeSidebar();" class="w-full text-left p-3 rounded-2xl font-bold flex items-center gap-3 hover:bg-blue-50 hover:text-blue-600 transition text-gray-700">${iconDisplaySidebar} ${name}</button></li>`;
                 }
             });
+            startAutoScroll(); // Start Auto Slider for categories
         });
+
+        // --- Auto Scroll Functionality for Categories ---
+        let autoScrollInterval;
+        function startAutoScroll() {
+            const slider = document.getElementById('catSlider');
+            if(!slider) return;
+            if(autoScrollInterval) clearInterval(autoScrollInterval);
+            
+            autoScrollInterval = setInterval(() => {
+                if (slider.scrollLeft + slider.clientWidth >= slider.scrollWidth - 10) {
+                    slider.scrollTo({ left: 0, behavior: 'smooth' });
+                } else {
+                    slider.scrollBy({ left: 126, behavior: 'smooth' }); // Scroll width of one card + gap
+                }
+            }, 3000);
+        }
+
+        // Pause auto-scroll when user touches/hovers the slider
+        const sliderEl = document.getElementById('catSlider');
+        if(sliderEl) {
+            sliderEl.addEventListener('mouseenter', () => clearInterval(autoScrollInterval));
+            sliderEl.addEventListener('mouseleave', startAutoScroll);
+            sliderEl.addEventListener('touchstart', () => clearInterval(autoScrollInterval), {passive: true});
+            sliderEl.addEventListener('touchend', startAutoScroll, {passive: true});
+        }
+        // -------------------------------------------------
 
         db.ref('products').on('value', snap => {
             window.prods = []; snap.forEach(c => {
@@ -340,16 +388,16 @@
 
         const cardTemplate = (p) => {
             const isLiked = userWishlist[p.id] ? 'liked' : '';
-            return `<div class="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer hover:shadow-md transition" onclick="view('${p.id}')">
-                <div class="relative">
-                    <img src="${p.images[0]}" class="w-full h-40 object-cover object-top">
-                    <span class="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm text-white text-[8px] px-2 py-0.5 rounded-full font-bold uppercase">${p.code}</span>
+            return `<div class="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer hover:shadow-md hover:-translate-y-1 transition-all duration-300 group" onclick="view('${p.id}')">
+                <div class="relative overflow-hidden">
+                    <img src="${p.images[0]}" class="w-full h-44 object-cover object-top group-hover:scale-105 transition-transform duration-500">
+                    <span class="absolute bottom-2 right-2 bg-black/70 backdrop-blur-sm text-white text-[9px] px-2.5 py-1 rounded-md font-bold uppercase tracking-wider">${p.code}</span>
                 </div>
-                <div class="p-3">
+                <div class="p-4">
                     <h3 class="font-bold text-xs truncate text-gray-800">${p.name}</h3>
-                    <div class="flex justify-between items-center mt-2">
+                    <div class="flex justify-between items-center mt-3">
                         <p class="text-blue-600 font-black text-sm">Rs. ${p.price}</p>
-                        <button onclick="toggleLike('${p.id}', event)" class="text-gray-300 hover:text-red-500 transition"><i class="fa-solid fa-heart ${isLiked}"></i></button>
+                        <button onclick="toggleLike('${p.id}', event)" class="text-gray-300 hover:text-red-500 transition w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center"><i class="fa-solid fa-heart ${isLiked}"></i></button>
                     </div>
                 </div>
             </div>`;
@@ -374,7 +422,7 @@
             const optContainer = document.getElementById('pOptionsContainer');
             const optSelect = document.getElementById('pOptionsSelect');
             if(selected.sizes && selected.sizes.length > 0) {
-                optSelect.innerHTML = `<option value="">-- Choose --</option>` + selected.sizes.map(s => `<option value="${s}">${s}</option>`).join('');
+                optSelect.innerHTML = `<option value="">-- Choose Option --</option>` + selected.sizes.map(s => `<option value="${s}">${s}</option>`).join('');
                 optContainer.classList.remove('hidden');
             } else { optContainer.classList.add('hidden'); }
             
@@ -382,7 +430,7 @@
             const dots = document.getElementById('dotsContainer');
             slider.innerHTML = ''; dots.innerHTML = '';
             selected.images.forEach((img, i) => {
-                slider.innerHTML += `<div class="w-full flex-shrink-0 snap-center"><img src="${img}" class="w-full h-full object-cover cursor-zoom-in" ondblclick="showFullImage(this.src)"></div>`;
+                slider.innerHTML += `<div class="w-full flex-shrink-0 snap-center"><img src="${img}" class="w-full h-full object-cover cursor-zoom-in hover:opacity-95 transition" ondblclick="showFullImage(this.src)"></div>`;
                 dots.innerHTML += `<div class="slider-dot ${i===0?'active-dot':''}"></div>`;
             });
             document.getElementById('pModal').classList.remove('hidden');
@@ -415,11 +463,11 @@
                 list.innerHTML = `<div class="col-span-2 text-center py-10 text-gray-400 font-bold">No favorites yet!</div>`;
             } else {
                 likedItems.forEach(p => {
-                    list.innerHTML += `<div class="bg-gray-50 rounded-2xl p-2 border relative" onclick="closeModal('wishlistModal'); view('${p.id}')">
+                    list.innerHTML += `<div class="bg-gray-50 rounded-2xl p-2 border relative cursor-pointer hover:border-blue-300 transition" onclick="closeModal('wishlistModal'); view('${p.id}')">
                         <img src="${p.images[0]}" class="w-full h-24 object-cover rounded-xl mb-2">
-                        <p class="text-[10px] font-bold truncate">${p.name}</p>
-                        <p class="text-blue-600 text-[10px] font-black">Rs. ${p.price}</p>
-                        <button onclick="toggleLike('${p.id}', event)" class="absolute top-3 right-3 text-red-500 bg-white/80 w-6 h-6 rounded-full flex items-center justify-center text-[10px] shadow-sm"><i class="fa-solid fa-trash"></i></button>
+                        <p class="text-[10px] font-bold truncate text-gray-700">${p.name}</p>
+                        <p class="text-blue-600 text-[11px] font-black mt-1">Rs. ${p.price}</p>
+                        <button onclick="toggleLike('${p.id}', event)" class="absolute top-3 right-3 text-red-500 bg-white/90 w-7 h-7 rounded-full flex items-center justify-center text-[11px] shadow-sm hover:bg-red-50"><i class="fa-solid fa-trash"></i></button>
                     </div>`;
                 });
             }
@@ -431,26 +479,28 @@
             const p = window.prods.find(x => x.id === id);
             const optSelect = document.getElementById('pOptionsSelect');
             const variation = (!document.getElementById('pOptionsContainer').classList.contains('hidden')) ? optSelect.value : '';
-            if(variation === "" && !document.getElementById('pOptionsContainer').classList.contains('hidden')) return alert("Select Option!");
+            if(variation === "" && !document.getElementById('pOptionsContainer').classList.contains('hidden')) return alert("Select Option first!");
             const cartRef = db.ref(`carts/${currentUser.uid}`);
             cartRef.once('value', snap => {
                 let foundKey = null;
                 snap.forEach(child => { if(child.val().id === id && child.val().variation === variation) foundKey = child.key; });
                 foundKey ? db.ref(`carts/${currentUser.uid}/${foundKey}`).update({ qty: snap.val()[foundKey].qty + 1 }) : cartRef.push({...p, qty: 1, variation: variation});
-                alert("Added!");
+                alert("Successfully Added to Cart!");
             });
         }
 
         function updateCartUI() {
             const list = document.getElementById('cartItemsList');
             const cTop = document.getElementById('cartCount');
+            const cMob = document.getElementById('cartCountMobile');
             const gTotal = document.getElementById('cartGrandTotal');
             list.innerHTML = ''; let total = 0;
             cartItems.forEach(item => {
                 total += parseInt(item.price) * item.qty;
-                list.innerHTML += `<div class="flex gap-4 items-center bg-gray-50 p-3 rounded-2xl border"><img src="${item.images[0]}" class="w-12 h-12 rounded-lg object-cover"><div class="flex-1"><p class="text-xs font-bold">${item.name}</p><p class="text-blue-600 text-xs font-black">Rs. ${item.price} x ${item.qty}</p></div><button onclick="removeFromCart('${item.firebaseKey}')" class="text-red-400 p-2"><i class="fa-solid fa-trash"></i></button></div>`;
+                list.innerHTML += `<div class="flex gap-4 items-center bg-gray-50 p-3 rounded-2xl border"><img src="${item.images[0]}" class="w-12 h-12 rounded-lg object-cover"><div class="flex-1"><p class="text-xs font-bold text-gray-800">${item.name}</p><p class="text-blue-600 text-xs font-black">Rs. ${item.price} x ${item.qty}</p></div><button onclick="removeFromCart('${item.firebaseKey}')" class="text-red-400 p-2 hover:bg-red-50 rounded-full transition"><i class="fa-solid fa-trash"></i></button></div>`;
             });
             cTop.innerText = cartItems.length; cTop.classList.toggle('hidden', cartItems.length === 0);
+            if(cMob) { cMob.innerText = cartItems.length; cMob.classList.toggle('hidden', cartItems.length === 0); }
             gTotal.innerText = 'Rs. ' + total;
         }
 
@@ -461,13 +511,24 @@
         }
 
         function toggleLike(id, e) { if(e) e.stopPropagation(); if(!currentUser) return openAuth(); const ref = db.ref(`wishlist/${currentUser.uid}/${id}`); userWishlist[id] ? ref.remove() : ref.set(true); }
-        function filterCat(name) { activeCategory = name; renderGrid(); document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active-cat', b.id === 'btn-'+name)); }
+        function filterCat(name) { 
+            activeCategory = name; 
+            renderGrid(); 
+            document.querySelectorAll('.cat-btn').forEach(b => {
+                const isActive = b.id === 'btn-'+name;
+                b.classList.toggle('active-cat', isActive);
+                // Adjust colors for active state
+                const span = b.querySelector('span');
+                const iconContainer = b.querySelector('div');
+                if(span) span.classList.toggle('text-blue-600', isActive);
+            }); 
+        }
         function setPayment(m) { paymentMethod = m; document.getElementById('payOnline').classList.toggle('active', m==='Online'); document.getElementById('payCOD').classList.toggle('active', m==='COD'); document.getElementById('onlineInfo').classList.toggle('hidden', m==='COD'); let p = isCartOrder ? cartItems.reduce((a,b)=>a+(parseInt(b.price)*b.qty),0) : parseInt(selected.price); let d = m==='COD' ? 150 : 0; document.getElementById('dFee').innerText = 'Rs. ' + d; document.getElementById('fTotal').innerText = 'Rs. ' + (p + d); }
-        function goConfirm() { if(!document.getElementById('uName').value || !document.getElementById('uPhone').value || !document.getElementById('uAddr').value) return alert("Fill Details!"); let p = isCartOrder ? cartItems.reduce((a,b)=>a+(parseInt(b.price)*b.qty),0) : parseInt(selected.price); document.getElementById('fPrice').innerText = 'Rs. ' + p; setPayment(paymentMethod); document.getElementById('step1').classList.add('hidden'); document.getElementById('step2').classList.remove('hidden'); }
+        function goConfirm() { if(!document.getElementById('uName').value || !document.getElementById('uPhone').value || !document.getElementById('uAddr').value) return alert("Fill all Details!"); let p = isCartOrder ? cartItems.reduce((a,b)=>a+(parseInt(b.price)*b.qty),0) : parseInt(selected.price); document.getElementById('fPrice').innerText = 'Rs. ' + p; setPayment(paymentMethod); document.getElementById('step1').classList.add('hidden'); document.getElementById('step2').classList.remove('hidden'); }
         
         function processOrder() {
             if(!currentUser) return openAuth();
-            if(paymentMethod === 'Online' && !document.getElementById('uTrx').value) return alert("Enter TRX ID!");
+            if(paymentMethod === 'Online' && !document.getElementById('uTrx').value) return alert("Enter TRX ID for Online Payment!");
 
             const custName = document.getElementById('uName').value;
             const custPhone = document.getElementById('uPhone').value;
@@ -533,7 +594,7 @@
         function openCart() { document.getElementById('cartModal').classList.remove('hidden'); }
         function openAuth() { document.getElementById('aModal').classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        function checkoutCart() { if(cartItems.length === 0) return alert("Empty!"); isCartOrder = true; closeModal('cartModal'); document.getElementById('oModal').classList.remove('hidden'); }
+        function checkoutCart() { if(cartItems.length === 0) return alert("Cart is Empty!"); isCartOrder = true; closeModal('cartModal'); document.getElementById('oModal').classList.remove('hidden'); }
         function openOrder() { isCartOrder = false; closeModal('pModal'); document.getElementById('oModal').classList.remove('hidden'); }
         function login() { auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).then(()=>closeModal('aModal')).catch(e=>alert(e.message)); }
         function register() { auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).then(()=>closeModal('aModal')).catch(e=>alert(e.message)); }
