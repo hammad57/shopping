@@ -38,16 +38,16 @@
         /* Full Image Overlay */
         #fullImageModal img { max-width: 95%; max-height: 95%; object-fit: contain; }
 
-        /* Professional 3D Background Pattern (Fast Loading CSS Only) */
+        /* Professional 3D Background Pattern - COLOR UPDATED AND TRANSITIONED FOR DEPTH AND PROFESSIONALISM */
         .bg-3d-pattern {
-            background-color: #f1f5f9;
+            background-color: #15513A; /* Updated dominant color from image */
             background-image: 
-              linear-gradient(30deg, #e2e8f0 12%, transparent 12.5%, transparent 87%, #e2e8f0 87.5%, #e2e8f0),
-              linear-gradient(150deg, #e2e8f0 12%, transparent 12.5%, transparent 87%, #e2e8f0 87.5%, #e2e8f0),
-              linear-gradient(30deg, #e2e8f0 12%, transparent 12.5%, transparent 87%, #e2e8f0 87.5%, #e2e8f0),
-              linear-gradient(150deg, #e2e8f0 12%, transparent 12.5%, transparent 87%, #e2e8f0 87.5%, #e2e8f0),
-              linear-gradient(60deg, #cbd5e1 25%, transparent 25.5%, transparent 75%, #cbd5e1 75%, #cbd5e1),
-              linear-gradient(60deg, #cbd5e1 25%, transparent 25.5%, transparent 75%, #cbd5e1 75%, #cbd5e1);
+              linear-gradient(30deg, #1e6d4c1f 12%, transparent 12.5%, transparent 87%, #1e6d4c1f 87.5%, #1e6d4c1f),
+              linear-gradient(150deg, #1e6d4c1f 12%, transparent 12.5%, transparent 87%, #1e6d4c1f 87.5%, #1e6d4c1f),
+              linear-gradient(30deg, #0a2f2030 12%, transparent 12.5%, transparent 87%, #0a2f2030 87.5%, #0a2f2030),
+              linear-gradient(150deg, #0a2f2030 12%, transparent 12.5%, transparent 87%, #0a2f2030 87.5%, #0a2f2030),
+              linear-gradient(60deg, #08291c3d 25%, transparent 25.5%, transparent 75%, #08291c3d 75%, #08291c3d),
+              linear-gradient(60deg, #11533629 25%, transparent 25.5%, transparent 75%, #11533629 75%, #11533629);
             background-size: 80px 140px;
             background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;
             background-attachment: fixed;
@@ -583,6 +583,12 @@
             });
         }
 
+        function removeFromCart(key) { if(currentUser) db.ref(`carts/${currentUser.uid}/${key}`).remove(); }
+        function openSidebar() { document.getElementById('sidebarOverlay').classList.remove('hidden'); document.getElementById('sidebarMenu').classList.remove('-translate-x-full'); }
+        function closeSidebar() { document.getElementById('sidebarOverlay').classList.add('hidden'); document.getElementById('sidebarMenu').classList.add('-translate-x-full'); }
+        function openCart() { document.getElementById('cartModal').classList.remove('hidden'); }
+        function openAuth() { document.getElementById('aModal').classList.remove('hidden'); }
+        
         function updateCartUI() {
             const list = document.getElementById('cartItemsList');
             const cTop = document.getElementById('cartCount');
@@ -738,12 +744,6 @@
                 document.getElementById('uTrx').value = '';
             });
         }
-        
-        function removeFromCart(key) { if(currentUser) db.ref(`carts/${currentUser.uid}/${key}`).remove(); }
-        function openSidebar() { document.getElementById('sidebarOverlay').classList.remove('hidden'); document.getElementById('sidebarMenu').classList.remove('-translate-x-full'); }
-        function closeSidebar() { document.getElementById('sidebarOverlay').classList.add('hidden'); document.getElementById('sidebarMenu').classList.add('-translate-x-full'); }
-        function openCart() { document.getElementById('cartModal').classList.remove('hidden'); }
-        function openAuth() { document.getElementById('aModal').classList.remove('hidden'); }
         
         function closeModal(id) { 
             const modal = document.getElementById(id);
