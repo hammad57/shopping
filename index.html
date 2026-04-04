@@ -7,89 +7,127 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
     <style>
+        body { font-family: 'Poppins', sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .snap-x { scroll-snap-type: x mandatory; }
         .snap-center { scroll-snap-align: center; }
         .liked { color: #ef4444 !important; }
-        /* Professional Category Active State */
-        .active-cat { border-color: #2563eb !important; background-color: #eff6ff !important; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2) !important; }
-        .active-cat span { color: #2563eb !important; }
+        
+        /* Premium Category Active State */
+        .active-cat { 
+            background: linear-gradient(135deg, #2563eb, #1e40af) !important; 
+            color: white !important; 
+            border-color: #2563eb !important;
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
+            transform: translateY(-2px);
+        }
         
         .payment-option.active { border-color: #2563eb; background-color: #eff6ff; }
         .slider-dot { width: 6px; height: 6px; border-radius: 50%; background: #ddd; transition: 0.3s; }
         .active-dot { background: #2563eb; width: 15px; border-radius: 10px; }
+        
         /* Full Image Overlay */
         #fullImageModal img { max-width: 95%; max-height: 95%; object-fit: contain; }
+
+        /* Professional 3D Background Pattern (Fast Loading CSS Only) */
+        .bg-3d-pattern {
+            background-color: #f1f5f9;
+            background-image: 
+              linear-gradient(30deg, #e2e8f0 12%, transparent 12.5%, transparent 87%, #e2e8f0 87.5%, #e2e8f0),
+              linear-gradient(150deg, #e2e8f0 12%, transparent 12.5%, transparent 87%, #e2e8f0 87.5%, #e2e8f0),
+              linear-gradient(30deg, #e2e8f0 12%, transparent 12.5%, transparent 87%, #e2e8f0 87.5%, #e2e8f0),
+              linear-gradient(150deg, #e2e8f0 12%, transparent 12.5%, transparent 87%, #e2e8f0 87.5%, #e2e8f0),
+              linear-gradient(60deg, #cbd5e1 25%, transparent 25.5%, transparent 75%, #cbd5e1 75%, #cbd5e1),
+              linear-gradient(60deg, #cbd5e1 25%, transparent 25.5%, transparent 75%, #cbd5e1 75%, #cbd5e1);
+            background-size: 80px 140px;
+            background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;
+            background-attachment: fixed;
+        }
+
+        /* Smooth scrolling for categories */
+        #catSlider {
+            scroll-behavior: auto; /* Managed by JS for smooth auto-scroll */
+        }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-900 font-sans pb-24">
+<body class="bg-3d-pattern text-slate-900 pb-24">
 
-    <nav class="bg-white shadow-sm sticky top-0 z-50 p-4">
+    <nav class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50 p-4 border-b border-gray-100">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-4">
-                <button onclick="openSidebar()" class="text-gray-600 text-xl h-9 w-9 flex items-center justify-center border rounded-full bg-gray-50 hover:bg-gray-100 transition">
-                    <i class="fa-solid fa-bars"></i>
+                <button onclick="openSidebar()" class="text-gray-600 text-xl h-10 w-10 flex items-center justify-center border rounded-full bg-gray-50 shadow-sm hover:bg-blue-50 hover:text-blue-600 transition">
+                    <i class="fa-solid fa-bars-staggered"></i>
                 </button>
-                <h1 class="text-2xl font-black text-blue-600 tracking-tighter">STORE</h1>
+                <h1 class="text-2xl font-black text-blue-600 tracking-tighter" style="font-family: 'Righteous', cursive;">STORE</h1>
             </div>
             
             <div class="flex items-center gap-1">
-                <button onclick="openWishlist()" class="hidden md:block text-gray-600 p-2"><i class="fa-solid fa-heart text-xl"></i></button>
-                <button onclick="openCart()" class="relative text-gray-600 p-2">
+                <button onclick="openWishlist()" class="hidden md:block text-gray-600 p-2 hover:text-red-500 transition"><i class="fa-solid fa-heart text-xl"></i></button>
+                <button onclick="openCart()" class="relative text-gray-600 p-2 hover:text-blue-600 transition">
                     <i class="fa-solid fa-cart-shopping text-xl"></i>
-                    <span id="cartCount" class="absolute top-0 right-0 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold hidden">0</span>
+                    <span id="cartCount" class="absolute top-0 right-0 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold hidden shadow-md">0</span>
                 </button>
-                <button onclick="openAuth()" id="loginBtn" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-bold ml-2">Login</button>
+                <button onclick="openAuth()" id="loginBtn" class="bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-bold ml-2 shadow-md hover:bg-blue-700 transition">Login</button>
                 <div id="userInfo" class="hidden flex items-center gap-2">
-                    <button onclick="openOrders()" class="text-blue-600 text-xs font-bold bg-blue-50 p-2 rounded-lg">Orders</button>
-                    <button onclick="logout()" class="text-red-500 text-xs font-bold p-2"><i class="fa-solid fa-right-from-bracket"></i></button>
+                    <button onclick="openOrders()" class="text-blue-600 text-xs font-bold bg-blue-50 px-3 py-2 rounded-xl border border-blue-100">Orders</button>
+                    <button onclick="logout()" class="text-red-500 text-xs font-bold p-2 bg-red-50 rounded-xl"><i class="fa-solid fa-right-from-bracket"></i></button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 hidden z-[80] backdrop-blur-sm" onclick="closeSidebar()"></div>
-    <div id="sidebarMenu" class="fixed top-0 left-0 w-72 h-full bg-white z-[90] transform -translate-x-full transition-transform duration-300 flex flex-col shadow-2xl">
-        <div class="p-6 border-b flex justify-between items-start bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-800 text-white relative overflow-hidden">
-            <div class="absolute -right-4 -bottom-4 opacity-10 pointer-events-none">
-                <i class="fa-solid fa-store text-8xl"></i>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 hidden z-[80] backdrop-blur-sm transition-opacity" onclick="closeSidebar()"></div>
+    <div id="sidebarMenu" class="fixed top-0 left-0 w-80 h-full bg-white z-[90] transform -translate-x-full transition-transform duration-300 flex flex-col shadow-2xl rounded-r-2xl overflow-hidden">
+        
+        <div class="p-8 flex flex-col justify-center relative overflow-hidden" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6);">
+            <i class="fa-solid fa-cart-shopping absolute -right-6 -top-6 text-9xl opacity-10 text-white"></i>
+            <button onclick="closeSidebar()" class="absolute top-4 right-4 text-white hover:text-red-300 text-3xl font-light transition z-20">×</button>
+            <div class="relative z-10 flex items-center gap-4 mb-2 mt-4">
+                <div class="bg-white p-3 rounded-2xl shadow-lg transform rotate-3">
+                    <i class="fa-solid fa-store text-blue-600 text-3xl"></i>
+                </div>
+                <div>
+                    <h2 class="font-black text-2xl text-white tracking-wide" style="font-family: 'Righteous', cursive; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+                        Hammad
+                    </h2>
+                    <span class="text-[10px] font-sans font-bold tracking-widest text-blue-200 uppercase block mt-1">Online Shopping Centre</span>
+                </div>
             </div>
-            <h2 class="font-extrabold text-xl leading-tight flex flex-col items-start gap-1 relative z-10" style="font-family: 'Poppins', sans-serif;">
-                <span class="flex items-center gap-2 text-yellow-300 text-sm tracking-widest uppercase mb-1">
-                    <i class="fa-solid fa-shop"></i> Welcome
-                </span>
-                <span style="background: linear-gradient(to right, #ffffff, #fef08a); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                    Hammad Online<br>Shopping Centre
-                </span>
-            </h2>
-            <button onclick="closeSidebar()" class="text-3xl hover:text-red-300 transition relative z-10 leading-none">&times;</button>
         </div>
+
         <div class="flex-1 overflow-y-auto p-4 space-y-4">
             <ul id="sidebarCatList" class="space-y-2"></ul>
-            <hr>
-            <a href="#" class="flex items-center gap-3 p-3 font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition">
-                <i class="fa-solid fa-headset"></i> Help & Support
+            <hr class="border-gray-100">
+            <a href="#" class="flex items-center gap-3 p-3 font-bold text-gray-700 hover:bg-gray-50 rounded-xl transition">
+                <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center"><i class="fa-solid fa-headset"></i></div> 
+                Help & Support
             </a>
         </div>
     </div>
 
-    <div class="max-w-6xl mx-auto p-4">
+    <div class="max-w-6xl mx-auto p-4 relative z-10">
+        
         <div class="relative mb-6">
             <i class="fa-solid fa-magnifying-glass absolute left-4 top-4 text-gray-400"></i>
-            <input type="text" id="search" placeholder="Search by name or code..." onkeyup="search()" class="w-full p-4 pl-12 rounded-2xl border-none shadow-sm outline-blue-500 text-sm">
+            <input type="text" id="search" placeholder="Search by name or code..." onkeyup="search()" class="w-full p-4 pl-12 rounded-2xl border-none shadow-[0_4px_20px_-5px_rgba(0,0,0,0.05)] outline-blue-500 text-sm bg-white/90 backdrop-blur-sm">
         </div>
-        <div id="catSlider" class="flex gap-4 overflow-x-auto no-scrollbar snap-x mb-8 pb-4 pt-1 px-1"></div>
-        <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+
+        <div id="catSlider" class="flex gap-4 overflow-x-auto no-scrollbar mb-8 pb-4 pt-2 px-1">
+            </div>
+
+        <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-5"></div>
     </div>
 
-    <div class="fixed bottom-0 left-0 w-full bg-white shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)] z-40 flex justify-around p-3 md:hidden rounded-t-[24px] border-t border-gray-100">
+    <div class="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.1)] z-40 flex justify-around p-3 md:hidden rounded-t-[32px] border-t border-gray-100/50">
         <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="flex flex-col items-center text-blue-600 transition">
             <i class="fa-solid fa-house text-xl mb-1"></i>
             <span class="text-[10px] font-bold">Home</span>
@@ -100,7 +138,7 @@
         </button>
         <button onclick="openCart()" class="relative flex flex-col items-center text-gray-400 hover:text-blue-600 transition">
             <i class="fa-solid fa-cart-shopping text-xl mb-1"></i>
-            <span id="cartCountMobile" class="absolute -top-1 right-2 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span>
+            <span id="cartCountMobile" class="absolute -top-1 right-2 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden shadow-sm">0</span>
             <span class="text-[10px] font-bold">Cart</span>
         </button>
         <button onclick="openWishlist()" class="flex flex-col items-center text-gray-400 hover:text-blue-600 transition">
@@ -109,123 +147,141 @@
         </button>
     </div>
 
-    <div id="fullImageModal" class="fixed inset-0 bg-black/95 hidden z-[200] flex items-center justify-center p-4" onclick="closeFullImage()">
-        <button class="absolute top-6 right-6 text-white text-4xl">&times;</button>
-        <img id="fullImageSrc" src="" alt="Full View">
+    <div id="fullImageModal" class="fixed inset-0 bg-black/95 hidden z-[200] flex items-center justify-center p-4 backdrop-blur-md" onclick="closeFullImage()">
+        <button class="absolute top-6 right-6 text-white text-4xl hover:text-red-500 transition">&times;</button>
+        <img id="fullImageSrc" src="" alt="Full View" class="rounded-xl shadow-2xl">
     </div>
 
-    <div id="pModal" class="fixed inset-0 bg-black/80 hidden z-[60] flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-[32px] overflow-hidden relative flex flex-col max-h-[90vh]">
-            <button onclick="closeModal('pModal')" class="absolute top-4 right-4 bg-white rounded-full w-8 h-8 z-50 font-bold shadow-lg flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition">×</button>
-            <div class="relative">
-                <div class="absolute top-4 left-1/2 -translate-x-1/2 bg-black/70 text-white text-[10px] font-bold px-3 py-1.5 rounded-full z-10 flex items-center gap-2 backdrop-blur-sm pointer-events-none shadow-lg border border-white/20 animate-pulse">
-                    <i class="fa-solid fa-hand-pointer"></i> Double click picture for full size
-                </div>
-                
-                <div id="pSlider" class="w-full h-72 flex overflow-x-auto snap-x no-scrollbar scroll-smooth"></div>
-                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1" id="dotsContainer"></div>
+    <div id="pModal" class="fixed inset-0 bg-black/80 hidden z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-[32px] overflow-hidden relative flex flex-col max-h-[90vh] shadow-2xl border border-gray-100">
+            <button onclick="closeModal('pModal')" class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full w-8 h-8 z-50 font-bold shadow-lg flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition">×</button>
+            <div class="relative bg-gray-50">
+                <div id="pSlider" class="w-full h-80 flex overflow-x-auto snap-x no-scrollbar scroll-smooth"></div>
+                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1 bg-white/50 px-3 py-1.5 rounded-full backdrop-blur-md" id="dotsContainer"></div>
             </div>
             <div class="p-6 overflow-y-auto">
                 <div class="flex justify-between items-start">
                     <div>
-                        <h2 id="mName" class="text-xl font-black text-gray-800"></h2>
-                        <span id="mCode" class="text-[10px] text-blue-600 font-bold uppercase tracking-wider bg-blue-50 px-2 py-1 rounded-md"></span>
+                        <h2 id="mName" class="text-xl font-black text-gray-800 leading-tight"></h2>
+                        <span id="mCode" class="inline-block mt-1 bg-blue-50 px-2 py-0.5 rounded text-[10px] text-blue-600 font-bold uppercase tracking-wider"></span>
                     </div>
                     <div class="text-right">
-                        <p class="text-2xl font-black text-green-600">Rs. <span id="mPrice"></span></p>
+                        <p class="text-2xl font-black text-green-600 tracking-tight">Rs. <span id="mPrice"></span></p>
                     </div>
                 </div>
-                <p id="mDesc" class="text-gray-500 text-sm mt-4 leading-relaxed"></p>
-                <div id="pOptionsContainer" class="mt-4 mb-2 hidden bg-gray-50 p-3 rounded-xl border border-gray-100">
-                    <label class="text-xs font-black text-blue-600 uppercase tracking-wider block mb-1">Select Option</label>
-                    <select id="pOptionsSelect" class="w-full p-2 bg-white border rounded-lg outline-blue-500 text-sm font-bold text-gray-800 cursor-pointer"></select>
+                <p id="mDesc" class="text-gray-500 text-sm mt-4 leading-relaxed bg-gray-50 p-3 rounded-xl border border-gray-100"></p>
+                <div id="pOptionsContainer" class="mt-4 mb-2 hidden bg-blue-50/50 p-3 rounded-xl border border-blue-100">
+                    <label class="text-[10px] font-black text-blue-600 uppercase tracking-wider block mb-1">Select Size / Option</label>
+                    <select id="pOptionsSelect" class="w-full p-3 bg-white border-none rounded-lg shadow-sm outline-blue-500 text-sm font-bold text-gray-800 cursor-pointer"></select>
                 </div>
                 <div class="flex gap-2 mt-6">
-                    <button onclick="shareProduct(selected.id)" class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl hover:bg-blue-100 transition"><i class="fa-solid fa-share-nodes"></i></button>
-                    <button onclick="toggleLike(selected.id, event)" id="modalLikeIcon" class="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center text-xl transition hover:bg-red-50"><i class="fa-solid fa-heart"></i></button>
-                    <button onclick="addToCart(selected.id)" class="w-14 h-14 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center text-xl hover:bg-orange-200 transition"><i class="fa-solid fa-cart-plus"></i></button>
-                    <button onclick="openOrder()" class="flex-1 bg-blue-600 text-white font-bold rounded-2xl shadow-lg hover:bg-blue-700 transition">Order Now</button>
+                    <button onclick="shareProduct(selected.id)" class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl hover:bg-blue-100 transition shadow-sm"><i class="fa-solid fa-share-nodes"></i></button>
+                    <button onclick="toggleLike(selected.id, event)" id="modalLikeIcon" class="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center text-xl transition hover:bg-red-50 hover:text-red-500 shadow-sm"><i class="fa-solid fa-heart"></i></button>
+                    <button onclick="addToCart(selected.id)" class="w-14 h-14 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center text-xl hover:bg-orange-100 transition shadow-sm"><i class="fa-solid fa-cart-plus"></i></button>
+                    <button onclick="openOrder()" class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition">Order Now</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="oModal" class="fixed inset-0 bg-black/80 hidden z-[70] flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-[32px] p-6 shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
+    <div id="oModal" class="fixed inset-0 bg-black/80 hidden z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-[32px] p-6 shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar border border-gray-100">
             <div id="step1">
-                <h3 class="text-xl font-black mb-4 flex items-center gap-2"><i class="fa-solid fa-truck"></i> Delivery Details</h3>
-                <div class="space-y-3">
-                    <input type="text" id="uName" placeholder="Full Name" class="w-full p-3 bg-gray-50 rounded-xl text-sm border-none outline-blue-500">
-                    <input type="tel" id="uPhone" placeholder="Mobile Number" class="w-full p-3 bg-gray-50 rounded-xl text-sm border-none outline-blue-500">
-                    <input type="text" id="uCity" placeholder="City" class="w-full p-3 bg-gray-50 rounded-xl text-sm border-none outline-blue-500">
+                <h3 class="text-xl font-black mb-6 flex items-center gap-2 text-gray-800"><i class="fa-solid fa-truck-fast text-blue-500"></i> Delivery Details</h3>
+                <div class="space-y-4">
                     <div class="relative">
-                        <textarea id="uAddr" placeholder="Complete Address" class="w-full p-3 bg-gray-50 rounded-xl text-sm border-none outline-blue-500 pr-10" rows="3"></textarea>
-                        <button onclick="getLocation()" class="absolute right-2 top-2 w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center hover:bg-blue-100 transition shadow-sm" title="Get current location">
-                            <i class="fa-solid fa-location-dot"></i>
+                        <i class="fa-regular fa-user absolute left-4 top-4 text-gray-400"></i>
+                        <input type="text" id="uName" placeholder="Full Name" class="w-full p-3.5 pl-12 bg-gray-50 rounded-2xl text-sm border-none shadow-inner outline-blue-500 font-medium">
+                    </div>
+                    <div class="relative">
+                        <i class="fa-solid fa-phone absolute left-4 top-4 text-gray-400"></i>
+                        <input type="tel" id="uPhone" placeholder="Mobile Number" class="w-full p-3.5 pl-12 bg-gray-50 rounded-2xl text-sm border-none shadow-inner outline-blue-500 font-medium">
+                    </div>
+                    <div class="relative">
+                        <i class="fa-solid fa-city absolute left-4 top-4 text-gray-400"></i>
+                        <input type="text" id="uCity" placeholder="City" class="w-full p-3.5 pl-12 bg-gray-50 rounded-2xl text-sm border-none shadow-inner outline-blue-500 font-medium">
+                    </div>
+                    <div class="relative">
+                        <i class="fa-solid fa-map-location-dot absolute left-4 top-4 text-gray-400"></i>
+                        <textarea id="uAddr" placeholder="Complete Address" class="w-full p-3.5 pl-12 bg-gray-50 rounded-2xl text-sm border-none shadow-inner outline-blue-500 font-medium pr-12" rows="3"></textarea>
+                        <button onclick="getLocation()" class="absolute right-2 bottom-2 w-8 h-8 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center hover:bg-blue-200 transition shadow-sm" title="Get current location">
+                            <i class="fa-solid fa-location-crosshairs"></i>
                         </button>
                     </div>
                 </div>
-                <button onclick="goConfirm()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mt-6 shadow-lg">Confirm Address</button>
-                <button onclick="closeModal('oModal')" class="w-full mt-2 text-gray-400 text-xs font-bold uppercase">Cancel</button>
+                <button onclick="goConfirm()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mt-8 shadow-[0_10px_20px_-5px_rgba(37,99,235,0.4)] hover:bg-blue-700 transition">Confirm Address</button>
+                <button onclick="closeModal('oModal')" class="w-full mt-3 text-gray-400 text-xs font-bold uppercase hover:text-gray-600">Cancel</button>
             </div>
             <div id="step2" class="hidden text-center">
-                <h3 class="text-xl font-black mb-6">Payment Method</h3>
+                <h3 class="text-xl font-black mb-6 text-gray-800">Payment Method</h3>
                 <div class="grid grid-cols-2 gap-3 mb-6">
-                    <button onclick="setPayment('Online')" id="payOnline" class="payment-option border-2 p-4 rounded-2xl flex flex-col items-center gap-2 active">
-                        <i class="fa-solid fa-building-columns text-blue-600 text-xl"></i>
+                    <button onclick="setPayment('Online')" id="payOnline" class="payment-option border-2 border-transparent bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-2 active transition">
+                        <i class="fa-solid fa-building-columns text-blue-600 text-2xl"></i>
                         <span class="text-[10px] font-bold uppercase">Online Pay</span>
                     </button>
-                    <button onclick="setPayment('COD')" id="payCOD" class="payment-option border-2 p-4 rounded-2xl flex flex-col items-center gap-2">
-                        <i class="fa-solid fa-hand-holding-dollar text-green-600 text-xl"></i>
+                    <button onclick="setPayment('COD')" id="payCOD" class="payment-option border-2 border-transparent bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-2 transition">
+                        <i class="fa-solid fa-hand-holding-dollar text-green-600 text-2xl"></i>
                         <span class="text-[10px] font-bold uppercase">Cash on Delivery</span>
                     </button>
                 </div>
-                <div id="onlineInfo" class="bg-blue-50 p-4 rounded-xl mb-4 text-[11px] text-left border border-blue-100">
-                    <p class="font-bold text-blue-800">Easypaisa: 03423944508 (Muluk Hussain)</p>
-                    <input type="text" id="uTrx" placeholder="Enter Transaction ID" class="w-full p-2 mt-2 bg-white rounded border text-center font-bold outline-none">
+                <div id="onlineInfo" class="bg-blue-50 p-4 rounded-2xl mb-4 text-[11px] text-left border border-blue-100 relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 opacity-10"><i class="fa-solid fa-building-columns text-6xl"></i></div>
+                    <p class="font-bold text-blue-800 text-sm mb-1">Easypaisa Details</p>
+                    <p class="font-bold text-blue-600 text-lg">03423944508</p>
+                    <p class="text-gray-500 mb-3">Title: Muluk Hussain</p>
+                    <input type="text" id="uTrx" placeholder="Enter Transaction ID" class="w-full p-3 bg-white rounded-xl border-none shadow-sm text-center font-bold outline-blue-500">
                 </div>
-                <div class="bg-slate-50 p-4 rounded-xl mb-4 space-y-1 text-sm font-bold">
-                    <div class="flex justify-between"><span>Subtotal:</span> <span id="fPrice"></span></div>
-                    <div class="flex justify-between text-blue-600"><span>Delivery:</span> <span id="dFee">Rs. 0</span></div>
-                    <div class="flex justify-between text-lg border-t pt-2 mt-1"><span>Total Bill:</span> <span id="fTotal"></span></div>
+                <div class="bg-gray-50 p-4 rounded-2xl mb-6 space-y-2 text-sm font-bold border border-gray-100">
+                    <div class="flex justify-between text-gray-500"><span>Subtotal:</span> <span id="fPrice" class="text-gray-800"></span></div>
+                    <div class="flex justify-between text-blue-500"><span>Delivery:</span> <span id="dFee">Rs. 0</span></div>
+                    <div class="flex justify-between text-lg border-t border-gray-200 pt-3 mt-2 text-gray-800"><span class="font-black">Total Bill:</span> <span id="fTotal" class="text-green-600 font-black"></span></div>
                 </div>
-                <button onclick="processOrder()" class="w-full bg-green-500 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-xl">
+                <button onclick="processOrder()" class="w-full bg-[#25D366] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-[0_10px_20px_-5px_rgba(37,211,102,0.4)] hover:bg-[#128C7E] transition">
                     <i class="fa-brands fa-whatsapp text-2xl"></i> Send WhatsApp Order
                 </button>
+                <button onclick="document.getElementById('step2').classList.add('hidden'); document.getElementById('step1').classList.remove('hidden');" class="w-full mt-4 text-gray-400 text-xs font-bold uppercase">Back</button>
             </div>
         </div>
     </div>
 
-    <div id="cartModal" class="fixed inset-0 bg-black/80 hidden z-[110] flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-[32px] p-6 max-h-[80vh] flex flex-col shadow-2xl">
-            <div class="flex justify-between items-center mb-4 border-b pb-2">
-                <h2 class="text-xl font-black"><i class="fa-solid fa-cart-shopping text-blue-600"></i> Shopping Cart</h2>
-                <button onclick="closeModal('cartModal')" class="text-gray-400 font-bold text-xl">×</button>
+    <div id="cartModal" class="fixed inset-0 bg-black/80 hidden z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-[32px] p-6 max-h-[80vh] flex flex-col shadow-2xl border border-gray-100">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-3">
+                <h2 class="text-xl font-black text-gray-800"><i class="fa-solid fa-cart-shopping text-blue-600 mr-2"></i> Shopping Cart</h2>
+                <button onclick="closeModal('cartModal')" class="w-8 h-8 bg-gray-50 rounded-full text-gray-400 font-bold hover:bg-red-50 hover:text-red-500 transition">×</button>
             </div>
             <div id="cartItemsList" class="flex-1 overflow-y-auto space-y-3 no-scrollbar pr-1"></div>
-            <div class="mt-4 border-t pt-4">
-                <div class="flex justify-between font-black text-lg text-gray-800"><span>Total:</span> <span id="cartGrandTotal"></span></div>
-                <button onclick="checkoutCart()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mt-4 shadow-lg">Place Order</button>
+            <div class="mt-4 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                <div class="flex justify-between font-black text-lg text-gray-800"><span>Total:</span> <span id="cartGrandTotal" class="text-blue-600"></span></div>
+                <button onclick="checkoutCart()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mt-4 shadow-[0_10px_20px_-5px_rgba(37,99,235,0.4)] hover:bg-blue-700 transition">Place Order</button>
             </div>
         </div>
     </div>
 
-    <div id="aModal" class="fixed inset-0 bg-black/80 hidden z-[100] flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-[32px] p-8 text-center shadow-2xl">
-            <h2 class="text-2xl font-black text-blue-600 mb-6">Login / Register</h2>
-            <input type="email" id="email" placeholder="Email Address" class="w-full p-4 bg-gray-50 rounded-2xl mb-3 outline-blue-500 border-none">
-            <input type="password" id="pass" placeholder="Password" class="w-full p-4 bg-gray-50 rounded-2xl mb-4 outline-blue-500 border-none">
-            <button onclick="login()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mb-2 shadow-lg">Login</button>
-            <button onclick="register()" class="w-full bg-gray-100 text-gray-600 py-4 rounded-2xl font-bold">Create Account</button>
-            <button onclick="closeModal('aModal')" class="mt-4 text-gray-400 text-xs font-bold uppercase">Close</button>
+    <div id="aModal" class="fixed inset-0 bg-black/80 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-[32px] p-8 text-center shadow-2xl border border-gray-100 relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-50 rounded-full opacity-50"></div>
+            <div class="absolute -bottom-10 -left-10 w-24 h-24 bg-red-50 rounded-full opacity-50"></div>
+            
+            <div class="relative z-10">
+                <div class="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4 shadow-lg transform rotate-3"><i class="fa-solid fa-user-lock"></i></div>
+                <h2 class="text-2xl font-black text-gray-800 mb-6">Welcome Back</h2>
+                <div class="space-y-3 mb-6">
+                    <input type="email" id="email" placeholder="Email Address" class="w-full p-4 bg-gray-50 rounded-2xl outline-blue-500 border-none shadow-inner font-medium">
+                    <input type="password" id="pass" placeholder="Password" class="w-full p-4 bg-gray-50 rounded-2xl outline-blue-500 border-none shadow-inner font-medium">
+                </div>
+                <button onclick="login()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mb-3 shadow-[0_10px_20px_-5px_rgba(37,99,235,0.4)] hover:bg-blue-700 transition">Login Securely</button>
+                <button onclick="register()" class="w-full bg-white border-2 border-gray-100 text-gray-600 py-3.5 rounded-2xl font-bold hover:bg-gray-50 transition">Create Account</button>
+                <button onclick="closeModal('aModal')" class="mt-6 text-gray-400 text-xs font-bold uppercase hover:text-gray-600">Close Window</button>
+            </div>
         </div>
     </div>
 
     <div id="wishlistModal" class="fixed inset-0 bg-black/80 hidden z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-md rounded-[32px] p-6 max-h-[80vh] overflow-y-auto relative shadow-2xl">
-            <button onclick="closeModal('wishlistModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400">×</button>
-            <h2 class="text-xl font-black mb-6 flex items-center gap-2"><i class="fa-solid fa-heart text-red-500"></i> My Favorites</h2>
-            <div id="wishlistItems" class="grid grid-cols-2 gap-3"></div>
+        <div class="bg-white w-full max-w-md rounded-[32px] p-6 max-h-[80vh] overflow-y-auto relative shadow-2xl border border-gray-100">
+            <button onclick="closeModal('wishlistModal')" class="absolute top-4 right-4 w-8 h-8 bg-gray-50 rounded-full font-bold text-gray-400 hover:text-red-500 hover:bg-red-50 transition flex items-center justify-center z-10">×</button>
+            <h2 class="text-xl font-black mb-6 flex items-center gap-2 text-gray-800"><i class="fa-solid fa-heart text-red-500"></i> My Favorites</h2>
+            <div id="wishlistItems" class="grid grid-cols-2 gap-4"></div>
         </div>
     </div>
 
@@ -250,6 +306,32 @@
         let activeCategory = 'All';
         let paymentMethod = 'Online';
         let isCartOrder = false;
+        
+        // Auto Scroll Logic for Categories
+        let autoScrollInterval;
+        let scrollDirection = 1;
+        
+        function startAutoScroll() {
+            const slider = document.getElementById('catSlider');
+            if(!slider) return;
+            
+            // Clear existing interval if any
+            if(autoScrollInterval) clearInterval(autoScrollInterval);
+            
+            autoScrollInterval = setInterval(() => {
+                // Pause if user is hovering or touching
+                if(slider.matches(':hover') || slider.matches(':active')) return;
+                
+                slider.scrollLeft += scrollDirection;
+                
+                // Reverse direction at edges
+                if(slider.scrollLeft >= (slider.scrollWidth - slider.clientWidth - 1)) {
+                    scrollDirection = -1;
+                } else if (slider.scrollLeft <= 0) {
+                    scrollDirection = 1;
+                }
+            }, 30); // Speed of scroll
+        }
 
         auth.onAuthStateChanged(user => {
             currentUser = user;
@@ -312,17 +394,22 @@
             if(n.includes('watch')) return 'fa-clock';
             if(n.includes('electronic')) return 'fa-plug';
             if(n.includes('shoe')) return 'fa-shoe-prints';
-            if(n.includes('cloth')) return 'fa-shirt';
+            if(n.includes('cloth') || n.includes('stitched') || n.includes('apparel')) return 'fa-shirt';
+            if(n.includes('cosmetic') || n.includes('makeup')) return 'fa-wand-magic-sparkles';
+            if(n.includes('bag') || n.includes('handbag')) return 'fa-bag-shopping';
+            if(n.includes('kid')) return 'fa-child-reaching';
             return 'fa-tag';
         }
 
         db.ref('categories').on('value', snap => {
             const slider = document.getElementById('catSlider');
             const side = document.getElementById('sidebarCatList');
-            // Professional All Button
-            slider.innerHTML = `<button onclick="filterCat('All')" id="btn-All" class="cat-btn flex-shrink-0 bg-white border border-gray-200 w-[110px] h-[120px] rounded-[24px] flex flex-col items-center justify-center gap-3 active-cat hover:shadow-md transition-all duration-300 group snap-center"><div class="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center group-hover:scale-110 group-hover:bg-blue-100 transition-all"><i class="fa-solid fa-border-all text-2xl text-blue-500"></i></div><span class="text-[11px] font-extrabold uppercase tracking-wide text-gray-600 transition-colors">ALL</span></button>`;
             
-            side.innerHTML = '';
+            // Professional Category Card UI
+            slider.innerHTML = `<button onclick="filterCat('All')" id="btn-All" class="cat-btn min-w-[120px] bg-white/90 backdrop-blur-sm border border-gray-100 py-4 px-2 rounded-[20px] flex flex-col items-center justify-center gap-3 active-cat shadow-[0_4px_15px_-3px_rgba(0,0,0,0.05)] hover:shadow-lg transition-all duration-300">
+                <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xl mb-1"><i class="fa-solid fa-border-all"></i></div>
+                <span class="text-[11px] font-black tracking-wide">ALL ITEMS</span>
+            </button>`;
             
             snap.forEach(child => {
                 const c = child.val();
@@ -331,46 +418,28 @@
                     let iconDisplaySlider = '';
                     let iconDisplaySidebar = '';
                     if (c.image) {
-                        iconDisplaySlider = `<img src="${c.image}" class="w-14 h-14 object-cover rounded-full shadow-sm group-hover:scale-110 transition-transform">`;
-                        iconDisplaySidebar = `<img src="${c.image}" class="w-8 h-8 object-cover rounded-full shadow-sm border border-gray-100">`;
+                        iconDisplaySlider = `<img src="${c.image}" class="w-12 h-12 object-cover rounded-full shadow-sm mb-1 ring-2 ring-gray-50 p-0.5 bg-white">`;
+                        iconDisplaySidebar = `<img src="${c.image}" class="w-8 h-8 object-cover rounded-full shadow-sm">`;
                     } else {
                         const icon = getIcon(name);
-                        iconDisplaySlider = `<div class="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center group-hover:scale-110 group-hover:bg-blue-100 transition-all"><i class="fa-solid ${icon} text-2xl text-blue-500"></i></div>`;
-                        iconDisplaySidebar = `<div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center"><i class="fa-solid ${icon} text-blue-500 text-sm"></i></div>`;
+                        iconDisplaySlider = `<div class="w-12 h-12 rounded-full bg-gray-50 text-blue-500 flex items-center justify-center text-xl mb-1"><i class="fa-solid ${icon}"></i></div>`;
+                        iconDisplaySidebar = `<div class="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center"><i class="fa-solid ${icon}"></i></div>`;
                     }
-                    // Professional Category Cards
-                    slider.innerHTML += `<button onclick="filterCat('${name}')" id="btn-${name}" class="cat-btn flex-shrink-0 bg-white border border-gray-200 w-[110px] h-[120px] rounded-[24px] flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all duration-300 group snap-center">${iconDisplaySlider}<span class="text-[10px] font-extrabold uppercase text-center text-gray-600 leading-tight px-1 transition-colors">${name}</span></button>`;
-                    side.innerHTML += `<li><button onclick="filterCat('${name}'); closeSidebar();" class="w-full text-left p-3 rounded-2xl font-bold flex items-center gap-3 hover:bg-blue-50 hover:text-blue-600 transition text-gray-700">${iconDisplaySidebar} ${name}</button></li>`;
+                    
+                    slider.innerHTML += `<button onclick="filterCat('${name}')" id="btn-${name}" class="cat-btn min-w-[120px] bg-white/90 backdrop-blur-sm border border-gray-100 py-4 px-2 rounded-[20px] flex flex-col items-center justify-center gap-3 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.05)] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 text-gray-600">
+                        ${iconDisplaySlider}
+                        <span class="text-[11px] font-bold uppercase text-center tracking-wide leading-tight px-1">${name}</span>
+                    </button>`;
+                    
+                    side.innerHTML += `<li><button onclick="filterCat('${name}'); closeSidebar();" class="w-full text-left p-3 rounded-xl font-bold flex items-center gap-3 hover:bg-blue-50 text-gray-700 transition">
+                        ${iconDisplaySidebar} ${name}
+                    </button></li>`;
                 }
             });
-            startAutoScroll(); // Start Auto Slider for categories
-        });
-
-        // --- Auto Scroll Functionality for Categories ---
-        let autoScrollInterval;
-        function startAutoScroll() {
-            const slider = document.getElementById('catSlider');
-            if(!slider) return;
-            if(autoScrollInterval) clearInterval(autoScrollInterval);
             
-            autoScrollInterval = setInterval(() => {
-                if (slider.scrollLeft + slider.clientWidth >= slider.scrollWidth - 10) {
-                    slider.scrollTo({ left: 0, behavior: 'smooth' });
-                } else {
-                    slider.scrollBy({ left: 126, behavior: 'smooth' }); // Scroll width of one card + gap
-                }
-            }, 3000);
-        }
-
-        // Pause auto-scroll when user touches/hovers the slider
-        const sliderEl = document.getElementById('catSlider');
-        if(sliderEl) {
-            sliderEl.addEventListener('mouseenter', () => clearInterval(autoScrollInterval));
-            sliderEl.addEventListener('mouseleave', startAutoScroll);
-            sliderEl.addEventListener('touchstart', () => clearInterval(autoScrollInterval), {passive: true});
-            sliderEl.addEventListener('touchend', startAutoScroll, {passive: true});
-        }
-        // -------------------------------------------------
+            // Start Auto Scroll when categories are loaded
+            setTimeout(startAutoScroll, 500);
+        });
 
         db.ref('products').on('value', snap => {
             window.prods = []; snap.forEach(c => {
@@ -388,16 +457,17 @@
 
         const cardTemplate = (p) => {
             const isLiked = userWishlist[p.id] ? 'liked' : '';
-            return `<div class="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer hover:shadow-md hover:-translate-y-1 transition-all duration-300 group" onclick="view('${p.id}')">
-                <div class="relative overflow-hidden">
-                    <img src="${p.images[0]}" class="w-full h-44 object-cover object-top group-hover:scale-105 transition-transform duration-500">
-                    <span class="absolute bottom-2 right-2 bg-black/70 backdrop-blur-sm text-white text-[9px] px-2.5 py-1 rounded-md font-bold uppercase tracking-wider">${p.code}</span>
+            return `<div class="bg-white/90 backdrop-blur-sm rounded-[24px] shadow-[0_4px_20px_-5px_rgba(0,0,0,0.05)] border border-gray-100/50 overflow-hidden relative cursor-pointer hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col h-full" onclick="view('${p.id}')">
+                <div class="relative overflow-hidden aspect-[4/5]">
+                    <img src="${p.images[0]}" class="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60"></div>
+                    <span class="absolute bottom-3 right-3 bg-white/90 backdrop-blur-md text-slate-800 text-[9px] px-2.5 py-1 rounded-full font-black uppercase shadow-sm tracking-wider">${p.code}</span>
                 </div>
-                <div class="p-4">
-                    <h3 class="font-bold text-xs truncate text-gray-800">${p.name}</h3>
-                    <div class="flex justify-between items-center mt-3">
-                        <p class="text-blue-600 font-black text-sm">Rs. ${p.price}</p>
-                        <button onclick="toggleLike('${p.id}', event)" class="text-gray-300 hover:text-red-500 transition w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center"><i class="fa-solid fa-heart ${isLiked}"></i></button>
+                <div class="p-4 flex flex-col flex-1 justify-between">
+                    <h3 class="font-bold text-xs line-clamp-2 text-gray-800 leading-snug mb-2">${p.name}</h3>
+                    <div class="flex justify-between items-center mt-auto pt-2 border-t border-gray-50">
+                        <p class="text-blue-600 font-black text-sm tracking-tight">Rs. ${p.price}</p>
+                        <button onclick="toggleLike('${p.id}', event)" class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 transition shadow-sm"><i class="fa-solid fa-heart ${isLiked}"></i></button>
                     </div>
                 </div>
             </div>`;
@@ -415,7 +485,7 @@
             selected = window.prods.find(x => x.id === id);
             document.getElementById('mName').innerText = selected.name;
             document.getElementById('mCode').innerText = selected.code;
-            document.getElementById('mDesc').innerText = selected.desc || '';
+            document.getElementById('mDesc').innerText = selected.desc || 'No description provided for this product.';
             document.getElementById('mPrice').innerText = selected.price;
             document.getElementById('modalLikeIcon').querySelector('i').className = `fa-solid fa-heart ${userWishlist[id] ? 'liked' : ''}`;
             
@@ -429,8 +499,16 @@
             const slider = document.getElementById('pSlider');
             const dots = document.getElementById('dotsContainer');
             slider.innerHTML = ''; dots.innerHTML = '';
+            
             selected.images.forEach((img, i) => {
-                slider.innerHTML += `<div class="w-full flex-shrink-0 snap-center"><img src="${img}" class="w-full h-full object-cover cursor-zoom-in hover:opacity-95 transition" ondblclick="showFullImage(this.src)"></div>`;
+                // Professional Double Click Suggestion Badge Overlay
+                slider.innerHTML += `
+                <div class="relative w-full flex-shrink-0 snap-center">
+                    <div class="absolute top-4 left-1/2 -translate-x-1/2 bg-black/70 text-white text-[10px] px-4 py-1.5 rounded-full backdrop-blur-sm pointer-events-none z-10 flex items-center gap-2 animate-pulse shadow-lg font-bold tracking-wide">
+                        <i class="fa-solid fa-hand-pointer text-blue-300"></i> Double Tap For Full Screen
+                    </div>
+                    <img src="${img}" class="w-full h-full object-cover cursor-zoom-in" ondblclick="showFullImage(this.src)">
+                </div>`;
                 dots.innerHTML += `<div class="slider-dot ${i===0?'active-dot':''}"></div>`;
             });
             document.getElementById('pModal').classList.remove('hidden');
@@ -441,7 +519,8 @@
             if(!p) return;
             const optSelect = document.getElementById('pOptionsSelect');
             const variation = (!document.getElementById('pOptionsContainer').classList.contains('hidden')) ? optSelect.value : 'N/A';
-            let msg = `*🔥 PRODUCT DETAILS 🔥*\n\n`;
+            let msg = `*🔥 PREMIUM PRODUCT DETAILS 🔥*\n\n`;
+            msg += `*Store:* Hammad Online Shopping Centre\n`;
             msg += `*Item:* ${p.name}\n`;
             msg += `*Code:* ${p.code}\n`;
             msg += `*Price:* Rs. ${p.price}\n`;
@@ -460,14 +539,14 @@
             list.innerHTML = '';
             const likedItems = window.prods.filter(p => userWishlist[p.id]);
             if(likedItems.length === 0) {
-                list.innerHTML = `<div class="col-span-2 text-center py-10 text-gray-400 font-bold">No favorites yet!</div>`;
+                list.innerHTML = `<div class="col-span-2 text-center py-12 flex flex-col items-center opacity-50"><i class="fa-regular fa-heart text-5xl mb-3 text-gray-300"></i><p class="text-gray-500 font-bold">No favorites yet!</p></div>`;
             } else {
                 likedItems.forEach(p => {
-                    list.innerHTML += `<div class="bg-gray-50 rounded-2xl p-2 border relative cursor-pointer hover:border-blue-300 transition" onclick="closeModal('wishlistModal'); view('${p.id}')">
-                        <img src="${p.images[0]}" class="w-full h-24 object-cover rounded-xl mb-2">
-                        <p class="text-[10px] font-bold truncate text-gray-700">${p.name}</p>
-                        <p class="text-blue-600 text-[11px] font-black mt-1">Rs. ${p.price}</p>
-                        <button onclick="toggleLike('${p.id}', event)" class="absolute top-3 right-3 text-red-500 bg-white/90 w-7 h-7 rounded-full flex items-center justify-center text-[11px] shadow-sm hover:bg-red-50"><i class="fa-solid fa-trash"></i></button>
+                    list.innerHTML += `<div class="bg-gray-50 rounded-[20px] p-2 border border-gray-100 relative cursor-pointer hover:shadow-md transition" onclick="closeModal('wishlistModal'); view('${p.id}')">
+                        <img src="${p.images[0]}" class="w-full h-32 object-cover rounded-xl mb-2">
+                        <p class="text-[10px] font-bold truncate px-1 text-gray-700">${p.name}</p>
+                        <p class="text-blue-600 text-[11px] font-black px-1 mt-0.5">Rs. ${p.price}</p>
+                        <button onclick="toggleLike('${p.id}', event)" class="absolute top-3 right-3 text-red-500 bg-white/90 backdrop-blur-sm w-7 h-7 rounded-full flex items-center justify-center text-[10px] shadow-sm hover:scale-110 transition"><i class="fa-solid fa-trash"></i></button>
                     </div>`;
                 });
             }
@@ -479,28 +558,57 @@
             const p = window.prods.find(x => x.id === id);
             const optSelect = document.getElementById('pOptionsSelect');
             const variation = (!document.getElementById('pOptionsContainer').classList.contains('hidden')) ? optSelect.value : '';
-            if(variation === "" && !document.getElementById('pOptionsContainer').classList.contains('hidden')) return alert("Select Option first!");
+            if(variation === "" && !document.getElementById('pOptionsContainer').classList.contains('hidden')) return alert("Please Select an Option/Size!");
+            
+            const btn = event.currentTarget;
+            const originalIcon = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
+            
             const cartRef = db.ref(`carts/${currentUser.uid}`);
             cartRef.once('value', snap => {
                 let foundKey = null;
                 snap.forEach(child => { if(child.val().id === id && child.val().variation === variation) foundKey = child.key; });
-                foundKey ? db.ref(`carts/${currentUser.uid}/${foundKey}`).update({ qty: snap.val()[foundKey].qty + 1 }) : cartRef.push({...p, qty: 1, variation: variation});
-                alert("Successfully Added to Cart!");
+                
+                if(foundKey) {
+                    db.ref(`carts/${currentUser.uid}/${foundKey}`).update({ qty: snap.val()[foundKey].qty + 1 }).then(()=>{
+                        btn.innerHTML = `<i class="fa-solid fa-check text-green-500"></i>`;
+                        setTimeout(()=> btn.innerHTML = originalIcon, 1000);
+                    });
+                } else {
+                    cartRef.push({...p, qty: 1, variation: variation}).then(()=>{
+                        btn.innerHTML = `<i class="fa-solid fa-check text-green-500"></i>`;
+                        setTimeout(()=> btn.innerHTML = originalIcon, 1000);
+                    });
+                }
             });
         }
 
         function updateCartUI() {
             const list = document.getElementById('cartItemsList');
             const cTop = document.getElementById('cartCount');
-            const cMob = document.getElementById('cartCountMobile');
+            const cTopMob = document.getElementById('cartCountMobile');
             const gTotal = document.getElementById('cartGrandTotal');
             list.innerHTML = ''; let total = 0;
+            
+            if(cartItems.length === 0) {
+                 list.innerHTML = `<div class="text-center py-10 opacity-50"><i class="fa-solid fa-cart-shopping text-5xl mb-3 text-gray-300"></i><p class="text-gray-500 font-bold">Cart is empty</p></div>`;
+            }
+            
             cartItems.forEach(item => {
                 total += parseInt(item.price) * item.qty;
-                list.innerHTML += `<div class="flex gap-4 items-center bg-gray-50 p-3 rounded-2xl border"><img src="${item.images[0]}" class="w-12 h-12 rounded-lg object-cover"><div class="flex-1"><p class="text-xs font-bold text-gray-800">${item.name}</p><p class="text-blue-600 text-xs font-black">Rs. ${item.price} x ${item.qty}</p></div><button onclick="removeFromCart('${item.firebaseKey}')" class="text-red-400 p-2 hover:bg-red-50 rounded-full transition"><i class="fa-solid fa-trash"></i></button></div>`;
+                list.innerHTML += `<div class="flex gap-4 items-center bg-gray-50 p-3 rounded-2xl border border-gray-100">
+                    <img src="${item.images[0]}" class="w-16 h-16 rounded-xl object-cover shadow-sm">
+                    <div class="flex-1">
+                        <p class="text-xs font-bold text-gray-800 line-clamp-1">${item.name}</p>
+                        ${item.variation ? `<p class="text-[10px] text-gray-500 font-bold mt-0.5">Opt: ${item.variation}</p>` : ''}
+                        <p class="text-blue-600 text-xs font-black mt-1">Rs. ${item.price} <span class="text-gray-400 font-normal">x ${item.qty}</span></p>
+                    </div>
+                    <button onclick="removeFromCart('${item.firebaseKey}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 transition shadow-sm"><i class="fa-solid fa-trash text-xs"></i></button>
+                </div>`;
             });
+            
             cTop.innerText = cartItems.length; cTop.classList.toggle('hidden', cartItems.length === 0);
-            if(cMob) { cMob.innerText = cartItems.length; cMob.classList.toggle('hidden', cartItems.length === 0); }
+            cTopMob.innerText = cartItems.length; cTopMob.classList.toggle('hidden', cartItems.length === 0);
             gTotal.innerText = 'Rs. ' + total;
         }
 
@@ -510,36 +618,73 @@
             window.prods.filter(p => p.name.toLowerCase().includes(val) || p.code.toLowerCase().includes(val)).forEach(p => grid.innerHTML += cardTemplate(p));
         }
 
-        function toggleLike(id, e) { if(e) e.stopPropagation(); if(!currentUser) return openAuth(); const ref = db.ref(`wishlist/${currentUser.uid}/${id}`); userWishlist[id] ? ref.remove() : ref.set(true); }
+        function toggleLike(id, e) { 
+            if(e) e.stopPropagation(); 
+            if(!currentUser) return openAuth(); 
+            
+            // Add a little pop animation class
+            if(e && e.currentTarget) {
+                e.currentTarget.classList.add('scale-125');
+                setTimeout(() => e.currentTarget.classList.remove('scale-125'), 200);
+            }
+            
+            const ref = db.ref(`wishlist/${currentUser.uid}/${id}`); 
+            userWishlist[id] ? ref.remove() : ref.set(true); 
+        }
+        
         function filterCat(name) { 
             activeCategory = name; 
             renderGrid(); 
             document.querySelectorAll('.cat-btn').forEach(b => {
                 const isActive = b.id === 'btn-'+name;
                 b.classList.toggle('active-cat', isActive);
-                // Adjust colors for active state
-                const span = b.querySelector('span');
-                const iconContainer = b.querySelector('div');
-                if(span) span.classList.toggle('text-blue-600', isActive);
+                if(!isActive) {
+                    b.classList.remove('bg-blue-600', 'text-white');
+                    b.classList.add('bg-white/90', 'text-gray-600');
+                } else {
+                    b.classList.remove('bg-white/90', 'text-gray-600');
+                }
             }); 
         }
-        function setPayment(m) { paymentMethod = m; document.getElementById('payOnline').classList.toggle('active', m==='Online'); document.getElementById('payCOD').classList.toggle('active', m==='COD'); document.getElementById('onlineInfo').classList.toggle('hidden', m==='COD'); let p = isCartOrder ? cartItems.reduce((a,b)=>a+(parseInt(b.price)*b.qty),0) : parseInt(selected.price); let d = m==='COD' ? 150 : 0; document.getElementById('dFee').innerText = 'Rs. ' + d; document.getElementById('fTotal').innerText = 'Rs. ' + (p + d); }
-        function goConfirm() { if(!document.getElementById('uName').value || !document.getElementById('uPhone').value || !document.getElementById('uAddr').value) return alert("Fill all Details!"); let p = isCartOrder ? cartItems.reduce((a,b)=>a+(parseInt(b.price)*b.qty),0) : parseInt(selected.price); document.getElementById('fPrice').innerText = 'Rs. ' + p; setPayment(paymentMethod); document.getElementById('step1').classList.add('hidden'); document.getElementById('step2').classList.remove('hidden'); }
+        
+        function setPayment(m) { 
+            paymentMethod = m; 
+            document.getElementById('payOnline').classList.toggle('active', m==='Online'); 
+            document.getElementById('payCOD').classList.toggle('active', m==='COD'); 
+            document.getElementById('onlineInfo').classList.toggle('hidden', m==='COD'); 
+            
+            let p = isCartOrder ? cartItems.reduce((a,b)=>a+(parseInt(b.price)*b.qty),0) : parseInt(selected.price); 
+            let d = m==='COD' ? 150 : 0; // 150 Delivery charge on COD
+            
+            document.getElementById('dFee').innerText = 'Rs. ' + d; 
+            document.getElementById('fTotal').innerText = 'Rs. ' + (p + d); 
+        }
+        
+        function goConfirm() { 
+            if(!document.getElementById('uName').value || !document.getElementById('uPhone').value || !document.getElementById('uAddr').value) {
+                return alert("Please fill all delivery details!");
+            }
+            let p = isCartOrder ? cartItems.reduce((a,b)=>a+(parseInt(b.price)*b.qty),0) : parseInt(selected.price); 
+            document.getElementById('fPrice').innerText = 'Rs. ' + p; 
+            setPayment(paymentMethod); 
+            document.getElementById('step1').classList.add('hidden'); 
+            document.getElementById('step2').classList.remove('hidden'); 
+        }
         
         function processOrder() {
             if(!currentUser) return openAuth();
-            if(paymentMethod === 'Online' && !document.getElementById('uTrx').value) return alert("Enter TRX ID for Online Payment!");
+            if(paymentMethod === 'Online' && !document.getElementById('uTrx').value) return alert("Please Enter Transaction ID!");
 
             const custName = document.getElementById('uName').value;
             const custPhone = document.getElementById('uPhone').value;
-            const custCity = document.getElementById('uCity').value;
+            const custCity = document.getElementById('uCity').value || 'Not provided';
             const custAddr = document.getElementById('uAddr').value;
             const subtotal = document.getElementById('fPrice').innerText;
             const delivery = document.getElementById('dFee').innerText;
             const totalBill = document.getElementById('fTotal').innerText;
             const trxId = document.getElementById('uTrx').value || "COD";
 
-            let msg = `*🚀 NEW ORDER RECEIVED 🚀*\n\n`;
+            let msg = `*🚀 NEW ORDER - HAMMAD ONLINE SHOPPING 🚀*\n\n`;
             msg += `*👤 CUSTOMER INFO*\n`;
             msg += `Name: ${custName}\n`;
             msg += `Phone: ${custPhone}\n`;
@@ -554,7 +699,7 @@
                     msg += `   Option: ${item.variation || 'N/A'}\n`;
                     msg += `   Qty: ${item.qty}\n`;
                     msg += `   Price: Rs. ${item.price}\n`;
-                    msg += `   Pictures: ${item.images.join(' , ')}\n\n`;
+                    msg += `   Images: ${item.images.join(' , ')}\n\n`;
                 });
             } else {
                 const variation = document.getElementById('pOptionsSelect').value || 'N/A';
@@ -562,7 +707,7 @@
                 msg += `Code: ${selected.code}\n`;
                 msg += `Option: ${variation}\n`;
                 msg += `Price: Rs. ${selected.price}\n`;
-                msg += `Pictures: ${selected.images.join(' , ')}\n\n`;
+                msg += `Images: ${selected.images.join(' , ')}\n\n`;
             }
 
             msg += `*💰 PRICE DETAIL*\n`;
@@ -577,6 +722,7 @@
                 details: isCartOrder ? cartItems.map(i => i.name).join(', ') : selected.name, 
                 total: totalBill, 
                 trxId: trxId, 
+                date: new Date().toISOString(),
                 customer: { name: custName, phone: custPhone, address: custAddr, city: custCity } 
             };
 
@@ -585,6 +731,11 @@
                 window.open(`https://wa.me/923423944508?text=${encodedMsg}`);
                 if(isCartOrder) db.ref(`carts/${currentUser.uid}`).remove();
                 closeModal('oModal');
+                
+                // Reset form
+                document.getElementById('step2').classList.add('hidden'); 
+                document.getElementById('step1').classList.remove('hidden');
+                document.getElementById('uTrx').value = '';
             });
         }
         
@@ -593,8 +744,18 @@
         function closeSidebar() { document.getElementById('sidebarOverlay').classList.add('hidden'); document.getElementById('sidebarMenu').classList.add('-translate-x-full'); }
         function openCart() { document.getElementById('cartModal').classList.remove('hidden'); }
         function openAuth() { document.getElementById('aModal').classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        function checkoutCart() { if(cartItems.length === 0) return alert("Cart is Empty!"); isCartOrder = true; closeModal('cartModal'); document.getElementById('oModal').classList.remove('hidden'); }
+        
+        function closeModal(id) { 
+            const modal = document.getElementById(id);
+            // Add slight fade out effect before hiding
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.style.opacity = '1';
+            }, 200);
+        }
+        
+        function checkoutCart() { if(cartItems.length === 0) return alert("Your cart is empty!"); isCartOrder = true; closeModal('cartModal'); document.getElementById('oModal').classList.remove('hidden'); }
         function openOrder() { isCartOrder = false; closeModal('pModal'); document.getElementById('oModal').classList.remove('hidden'); }
         function login() { auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).then(()=>closeModal('aModal')).catch(e=>alert(e.message)); }
         function register() { auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).then(()=>closeModal('aModal')).catch(e=>alert(e.message)); }
