@@ -290,6 +290,18 @@
         </div>
     </div>
 
+    <div id="exitModal" class="fixed inset-0 bg-black/90 hidden z-[300] flex items-center justify-center p-4 backdrop-blur-md">
+        <div class="bg-emerald-950 border border-emerald-500/30 w-full max-w-xs rounded-[32px] p-6 text-center shadow-2xl relative">
+            <div class="w-16 h-16 bg-red-500/20 text-red-400 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 border border-red-500/30"><i class="fa-solid fa-door-open"></i></div>
+            <h2 class="text-xl font-black text-white mb-2">Exit Store?</h2>
+            <p class="text-emerald-100/80 text-sm mb-6">Kya aap waqai application band karna chahte hain?</p>
+            <div class="flex gap-3">
+                <button onclick="closeExitModal()" class="flex-1 bg-white/10 text-white py-3 rounded-2xl font-bold border border-white/20 hover:bg-white/20 transition text-sm">Cancel</button>
+                <button onclick="confirmExit()" class="flex-1 bg-red-500 text-white py-3 rounded-2xl font-bold shadow-lg hover:bg-red-600 transition text-sm">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyBQ0Ckzlgy8GV-uP89ypRHwrMX2Wq-2Mok",
@@ -314,6 +326,74 @@
         
         let autoScrollInterval;
         let scrollDirection = 1;
+
+        // --- BACK BUTTON & EXIT LOGIC (New Addition) ---
+        let lastBackPressTime = 0;
+        window.history.pushState({ page: 'main' }, null, window.location.href);
+
+        window.addEventListener('popstate', function(event) {
+            const modalIds = ['sidebarOverlay', 'fullImageModal', 'pModal', 'oModal', 'cartModal', 'aModal', 'wishlistModal'];
+            let closedAny = false;
+
+            // 1. Agar Exit Modal pehle se open hai toh usey band kar dein
+            const exitModal = document.getElementById('exitModal');
+            if (exitModal && !exitModal.classList.contains('hidden')) {
+                exitModal.classList.add('hidden');
+                window.history.pushState({ page: 'main' }, null, window.location.href);
+                return;
+            }
+
+            // 2. Check karein ke koi dusra modal open toh nahi hai
+            for (let id of modalIds) {
+                const el = document.getElementById(id);
+                if (el && !el.classList.contains('hidden')) {
+                    if (id === 'sidebarOverlay') {
+                        closeSidebar();
+                    } else {
+                        closeModal(id);
+                    }
+                    closedAny = true;
+                    break; // Ek waqt mein sirf ek upar wala modal close karega
+                }
+            }
+
+            // Agar koi modal close hua hai toh bas wapas history trap set kar dein
+            if (closedAny) {
+                window.history.pushState({ page: 'main' }, null, window.location.href);
+                return;
+            }
+
+            // 3. Double Tap Logic (Agar koi modal open nahi tha)
+            const currentTime = new Date().getTime();
+            if (currentTime - lastBackPressTime < 1000) { 
+                // Double tap detect ho gaya -> Custom Exit Modal show karein
+                exitModal.classList.remove('hidden');
+                window.history.pushState({ page: 'main' }, null, window.location.href);
+            } else {
+                lastBackPressTime = currentTime;
+                window.history.pushState({ page: 'main' }, null, window.location.href);
+
+                // Ek chhota sa notification (toast) show karein
+                let toast = document.createElement('div');
+                toast.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 bg-black/80 text-emerald-100 text-[11px] px-5 py-2.5 rounded-full z-[400] backdrop-blur-sm border border-white/20 transition-opacity duration-300 font-bold tracking-wide shadow-lg';
+                toast.innerText = 'Press back again to exit';
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                }, 1500);
+            }
+        });
+
+        function closeExitModal() {
+            document.getElementById('exitModal').classList.add('hidden');
+        }
+
+        function confirmExit() {
+            window.close(); // Tab close karne ki koshish karega
+            window.history.go(-2); // Agar window.close() block ho toh pichli website/app par chala jayega
+        }
+        // ----------------------------------------------
         
         function startAutoScroll() {
             const slider = document.getElementById('catSlider');
